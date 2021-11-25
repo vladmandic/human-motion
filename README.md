@@ -1,10 +1,14 @@
-# Demo for Human with 3D Pose Mapping
+# Human: Motion Analytics Demo
 
-- Analyze 2D input video
-- Track 39 body keypoints in a web worker thread
-- Display 3D body **overlay** or **wireframe** with *pan/zoom/rotate* functionality
+Using [**Human**](https://github.com/vladmandic/human) library
 
-> [**Live Demo**](https://vladmandic.github.io/human-pose/src/index.html)
+- Analyze 2D input video: **Face**, **Body**, **Hands**
+- Track all keypoints in a *web worker* thread
+- Display 3D **overlay** or **wireframe** with *pan/zoom/rotate* functionality
+
+<br>
+
+> [**Live Demo**](https://vladmandic.github.io/human-motion/src/index.html)
 
 <br>
 

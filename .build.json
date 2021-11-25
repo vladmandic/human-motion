@@ -34,20 +34,20 @@
       "treeShaking": true,
       "ignoreAnnotations": false,
       "minify": false,
-      "banner": { "js": "/*\n  Demo for Human with 3D Pose Mapping\n  author: <https://github.com/vladmandic>'\n*/\n" }
+      "banner": { "js": "/*\n  Human: Motion Analytics Demo\n  author: <https://github.com/vladmandic>'\n*/\n" }
     },
     "targets": [
       {
         "format": "esm",
         "platform": "browser",
-        "name": "human-pose-index",
+        "name": "index",
         "input": "src/index.ts",
         "output": "dist/index.js"
       },
       {
         "format": "esm",
         "platform": "browser",
-        "name": "human-pose-worker",
+        "name": "worker",
         "input": "src/worker.ts",
         "output": "dist/worker.js"
       }

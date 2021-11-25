@@ -1,6 +1,6 @@
 {
-  "name": "human-pose",
-  "description": "Human Motion Analytics Demo",
+  "name": "human-motion",
+  "description": "Human: Motion Analytics Demo",
   "license": "MIT",
   "author": "Vladimir Mandic <mandic00@live.com>",
   "version": "0.0.1",
