@@ -1,3 +1,6 @@
 node_modules
 pnpm-lock.yaml
-*.mp4
+assets/BaseballPitch.mp4
+assets/ContemporaryDance.mp4
+assets/FaceModel.mp4
+assets/FloorGymnast.mp4
