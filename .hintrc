@@ -1,0 +1,8 @@
+{
+  "extends": ["web-recommended"],
+  "browserslist": ["chrome >= 95"],
+  "hints": {
+    "no-inline-styles": "off",
+    "meta-charset-utf-8": "off"
+  }
+}

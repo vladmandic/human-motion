@@ -1,0 +1,42 @@
+{
+  "globals": {},
+  "env": {
+      "node": true,
+      "es2021": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "airbnb-base",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "ignorePatterns": [
+    "dist",
+    "node_modules"
+  ],
+  "rules": {
+    "@typescript-eslint/ban-ts-comment": "off",
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "import/prefer-default-export": "off",
+    "max-len": [1, 275, 3],
+    "newline-per-chained-call": "off",
+    "no-await-in-loop": "off",
+    "no-continue": "off",
+    "no-console": "off",
+    "no-mixed-operators": "off",
+    "no-plusplus": "off",
+    "no-loop-func": "off",
+    "no-restricted-syntax": "off",
+    "no-param-reassign": "off",
+    "object-curly-newline": "off",
+    "prefer-template": "off",
+    "radix": "off"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "log": {
+    "enabled": false,
+    "debug": false,
+    "console": true
+  },
+  "profiles": {
+    "production": ["clean", "compile", "lint"],
+    "development": ["serve", "watch", "compile"]
+  },
+  "clean": {
+    "locations": ["dist/*", "types/*", "typedoc/*"]
+  },
+  "lint": {
+    "locations": [ "src/**/*.ts" ],
+    "rules": { }
+  },
+  "watch": {
+    "locations": [ "src/**/*" ]
+  },
+  "serve": {
+    "sslKey": "node_modules/@vladmandic/build/cert/https.key",
+    "sslCrt": "node_modules/@vladmandic/build/cert/https.crt",
+    "httpPort": 8000,
+    "httpsPort": 8001,
+    "documentRoot": ".",
+    "defaultFolder": "src",
+    "defaultFile": "index.html"
+  },
+  "build": {
+    "global": {
+      "target": "esnext",
+      "sourcemap": true,
+      "treeShaking": true,
+      "ignoreAnnotations": false,
+      "minify": false,
+      "banner": { "js": "/*\n  Demo for Human with 3D Pose Mapping\n  author: <https://github.com/vladmandic>'\n*/\n" }
+    },
+    "targets": [
+      {
+        "format": "esm",
+        "platform": "browser",
+        "name": "human-pose-index",
+        "input": "src/index.ts",
+        "output": "dist/index.js"
+      },
+      {
+        "format": "esm",
+        "platform": "browser",
+        "name": "human-pose-worker",
+        "input": "src/worker.ts",
+        "output": "dist/worker.js"
+      }
+   ]
+  }
+}
