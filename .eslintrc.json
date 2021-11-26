@@ -36,6 +36,7 @@
     "no-restricted-syntax": "off",
     "no-param-reassign": "off",
     "object-curly-newline": "off",
+    "prefer-destructuring": "off",
     "prefer-template": "off",
     "radix": "off"
   }

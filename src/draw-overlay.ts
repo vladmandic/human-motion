@@ -1,6 +1,8 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
 
+let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
+let triangulation: number[];
 
 function point(pt: H.Point, pointSize: number, label?: string) {
   ctx.fillStyle = `rgba(${127.5 + (2 * (pt[2] || 0))}, ${127.5 - (2 * (pt[2] || 0))}, 255, 0.5)`;
@@ -39,7 +41,7 @@ async function body(scale: [number, number], result: H.BodyResult) {
   }
 }
 
-export async function hand(scale: [number, number], result: Array<H.HandResult>) {
+async function hand(scale: [number, number], result: Array<H.HandResult>) {
   ctx.lineJoin = 'round';
   for (const h of result) {
     for (const kpt of h.keypoints) {
@@ -65,13 +67,49 @@ export async function hand(scale: [number, number], result: Array<H.HandResult>)
   }
 }
 
-export async function draw(input: HTMLVideoElement, canvas: HTMLCanvasElement, width: number, height: number, result: H.Result) {
-  if (!input || !canvas) return;
-  if (!ctx) ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+export async function face(scale: [number, number], f: H.FaceResult) {
+  const yOffset = 1.05;
+  if (!f.mesh || f.mesh.length !== 478) return;
+  for (const pt of f.meshRaw) point([pt[0] * canvas.width, yOffset * pt[1] * canvas.height, pt[2]] as H.Point, 6);
+  ctx.lineWidth = 2;
+  if (f.mesh.length > 450) {
+    for (let i = 0; i < triangulation.length / 3; i++) {
+      const points = [triangulation[i * 3 + 0], triangulation[i * 3 + 1], triangulation[i * 3 + 2]]
+        .map((index) => [f.meshRaw[index][0] * canvas.width, yOffset * f.meshRaw[index][1] * canvas.height, f.mesh[index][2]] as H.Point);
+      lines(points);
+    }
+  }
+  if (f.annotations && f.annotations.leftEyeIris && f.annotations.leftEyeIris[0]) {
+    ctx.strokeStyle = 'rgba(255, 200, 255, 1)';
+    ctx.beginPath();
+    const sizeX = Math.abs(f.annotations.leftEyeIris[3][0] - f.annotations.leftEyeIris[1][0]) / 2 / scale[0];
+    const sizeY = Math.abs(f.annotations.leftEyeIris[4][1] - f.annotations.leftEyeIris[2][1]) / 2 / scale[1];
+    ctx.ellipse(f.annotations.leftEyeIris[0][0] / scale[0], yOffset * f.annotations.leftEyeIris[0][1] / scale[1], sizeX, sizeY, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+  }
+  if (f.annotations && f.annotations.rightEyeIris && f.annotations.rightEyeIris[0]) {
+    ctx.strokeStyle = 'rgba(255, 200, 255, 1)';
+    ctx.beginPath();
+    const sizeX = Math.abs(f.annotations.rightEyeIris[3][0] - f.annotations.rightEyeIris[1][0]) / 2 / scale[0];
+    const sizeY = Math.abs(f.annotations.rightEyeIris[4][1] - f.annotations.rightEyeIris[2][1]) / 2 / scale[1];
+    ctx.ellipse(f.annotations.rightEyeIris[0][0] / scale[0], yOffset * f.annotations.rightEyeIris[0][1] / scale[1], sizeX, sizeY, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+  }
+}
+
+export async function init(output: HTMLCanvasElement, faceTriangulation: number[]) {
+  console.log('initializing overlay');
+  canvas = output;
+  triangulation = faceTriangulation;
+  ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+}
+
+export async function draw(width: number, height: number, result: H.Result, input: HTMLVideoElement) {
   ctx.filter = 'grayscale(1) blur(8px)';
   ctx.drawImage(input, 0, 0);
   ctx.filter = 'none';
   const scale: [number, number] = [width / canvas.width, height / canvas.height];
+  if (result && result.face && result.face[0]) await face(scale, result.face[0]);
   if (result && result.body && result.body[0]) await body(scale, result.body[0]);
   if (result && result.hand && result.hand.length > 0) await hand(scale, result.hand);
 }

@@ -22,12 +22,13 @@
   <body>
     <pre id="status" style="position: absolute; top: 12px; right: 20px; background-color: grey; padding: 8px; box-shadow: 2px 2px black"></pre>
     <div id="media" style="display: flex">
-      <video id="input" style="width: 50%; height: auto" autoplay loop controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
+      <video id="input" style="width: 50%; height: auto" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
       <canvas id="output-overlay" style="width: 50%; height: auto; display: none"></canvas>
       <canvas id="output-wireframe" style="width: 50%; height: auto; display: none"></canvas>
       <canvas id="output-avatar" style="width: 50%; height: auto; display: none"></canvas>
     </div>
     <div id="selections" style="margin: 8px; line-height: 32px">
+      <!--
       <span>select models
         <label style="margin-left: 24px; margin-right: 8px" for="face">face</label>
         <input type="checkbox" id="face" style="vertical-align: middle; width: 18px; height: 18px" name="face" value="face"> 
@@ -35,6 +36,16 @@
         <input type="checkbox" id="body" style="vertical-align: middle; width: 18px; height: 18px" name="body" value="body"> 
         <label style="margin-left: 24px; margin-right: 8px" for="hand">hands</label>
         <input type="checkbox" id="hand" style="vertical-align: middle; width: 18px; height: 18px" name="hand" value="hand"> 
+      </span>
+      <br>
+      -->
+      <span>select model
+        <input type="radio" id="face" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <label for="face">face</label>
+        <input type="radio" id="body" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <label for="body">body</label>
+        <input type="radio" id="hand" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <label for="hand">hands</label>
       </span>
       <br>
       <span >select video

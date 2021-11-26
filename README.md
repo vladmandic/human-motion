@@ -4,7 +4,7 @@ Using [**Human**](https://github.com/vladmandic/human) library
 
 - Analyze 2D input video: **Face**, **Body**, **Hands**
 - Track all keypoints in a *web worker* thread
-- Display 3D **overlay** or **wireframe** with *pan/zoom/rotate* functionality
+- Display **Video Overlay** or **3D Wireframe** with *pan/zoom/rotate* functionality
 
 <br>
 
@@ -12,7 +12,9 @@ Using [**Human**](https://github.com/vladmandic/human) library
 
 <br>
 
-![**Screenshot**](assets/screenshot.jpg)
+![**Screenshot-Face**](assets/screenshot-face.jpg)
+![**Screenshot-Body**](assets/screenshot-body.jpg)
+![**Screenshot-Hand**](assets/screenshot-hand.jpg)
 
 <br>
 
@@ -38,12 +40,16 @@ Using [**Human**](https://github.com/vladmandic/human) library
 
 ## Workflow
 
-- Video grab is processed and resized in the main thread using GPU
-- Image data is then transferred to worker thread for detection
-  - Worker thread signals back to main thread when complete
 - Main thread listens to messages from worker thread
-  - Dispatches draws request to a chosen output module
-  - Sends next frame for processing to worker thread
+  - Video grab is processed and resized in the main thread using GPU
+  - Image data is then transferred to worker thread for detection using `Human` library
+  - Worker thread signals back to main thread when complete
+  - When message is received by main thread it sends next frame for processing to worker thread
+- Redraw loop in the main thread runs at constant 60 FPS
+  - Interpolates last known detection results
+  - Calls draw in a chosen output module
+    - Video Overlay is drawn using built-in functions in `Human` library
+    - 3D Wireframe is drawn using `BabylonJS`
 
 <br>
 
@@ -59,6 +65,7 @@ If you want to use it, change `dependencies` in `package.json` to packages publi
 
 ## Todo
 
-1. Custom video uploads
-2. Body box tracking within frame
-3. Avatar animation
+- Wireframe: Cleanup on scene change
+- Models: Body box tracking within frame
+- Avatar: Animate Body
+- Avatar: Animate Skull

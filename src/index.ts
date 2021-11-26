@@ -1,17 +1,17 @@
 import * as H from '@vladmandic/human';
-import { draw as drawOverlay } from './draw-overlay';
-import { draw as drawMesh } from './draw-mesh';
-import { draw as drawAvatar } from './draw-avatar';
+import * as overlay from './draw-overlay';
+import * as mesh from './draw-mesh';
+import * as avatar from './draw-avatar';
 
-const width = 1080;
-const height = 1080;
+const width = 512;
+const height = 512;
 
 const config: Partial<H.Config> = {
   backend: 'humangl' as const, // try webgpu first with fallback to humangl
   modelBasePath: '../assets',
-  cacheSensitivity: 0.0,
+  cacheSensitivity: 0,
   filter: { enabled: true, equalization: true, width, height },
-  face: { enabled: false, detector: { rotation: false }, mesh: { enabled: true }, iris: { enabled: false }, description: { enabled: false }, emotion: { enabled: false } },
+  face: { enabled: false, detector: { rotation: false }, mesh: { enabled: true }, iris: { enabled: true }, description: { enabled: false }, emotion: { enabled: false } },
   body: { enabled: false, minConfidence: 0.1, maxDetected: 1, modelPath: 'blazepose-heavy.json' },
   hand: { enabled: false, minConfidence: 0.1, maxDetected: 1, landmarks: true, rotation: false },
   object: { enabled: false },
@@ -54,9 +54,9 @@ async function drawResults() {
       last = Date.now();
       const interpolated = dom.interpolate.checked ? await human.next(result) : result; // interpolation is optional
       const opt = (document.getElementById('select-output') as HTMLSelectElement).options;
-      if (opt.selectedIndex === 1) await drawOverlay(dom.input, dom.outputOverlay, width, height, interpolated);
-      else if (opt.selectedIndex === 2) await drawMesh(dom.outputWireframe, width, height, interpolated);
-      else if (opt.selectedIndex === 3) await drawAvatar(dom.outputAvatar, interpolated);
+      if (opt.selectedIndex === 1) await overlay.draw(width, height, interpolated, dom.input);
+      else if (opt.selectedIndex === 2) await mesh.draw(width, height, interpolated);
+      else if (opt.selectedIndex === 3) await avatar.draw(dom.outputAvatar, interpolated);
       else dom.status.innerText = 'select output';
     }
   }
@@ -80,7 +80,7 @@ async function receiveMessage(msg: MessageEvent) {
   busy = false;
   if (msg?.data?.state) {
     const state = JSON.parse(msg?.data?.state);
-    if (state.numTensors !== tensors) log(`state: tensors: ${state.numTensors.toLocaleString()} | bytes: ${state.numBytes.toLocaleString()} | ${human.env.webgl.version?.toLowerCase()}`);
+    if (state.numTensors > (tensors + 10)) log(`state: tensors: ${state.numTensors.toLocaleString()} | bytes: ${state.numBytes.toLocaleString()} | ${human.env.webgl.version?.toLowerCase()}`);
     tensors = state.numTensors;
   }
   if (msg?.data?.result) result = msg.data.result as H.Result;
@@ -148,9 +148,23 @@ async function init() {
     };
     reader.readAsDataURL(file);
   };
+  /*
   dom.face.onchange = () => { if (config.face) config.face.enabled = dom.face.checked; };
   dom.body.onchange = () => { if (config.body) config.body.enabled = dom.body.checked; };
   dom.hand.onchange = () => { if (config.hand) config.hand.enabled = dom.hand.checked; };
+  */
+  const enabled = (face: boolean, body: boolean, hand: boolean) => {
+    if (config.face) config.face.enabled = face;
+    if (config.body) config.body.enabled = body;
+    if (config.hand) config.hand.enabled = hand;
+    log(`selected model: ${face ? human.config.face.mesh?.modelPath : ''}${body ? human.config.body.modelPath : ''}${hand ? human.config.hand.detector?.modelPath : ''}`);
+    if (face) mesh.position('face');
+    if (body) mesh.position('body');
+    if (hand) mesh.position('hand');
+  };
+  dom.face.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
+  dom.body.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
+  dom.hand.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
 }
 
 async function main() {
@@ -159,6 +173,8 @@ async function main() {
   await human.validate(config);
   await human.init(); // requires explicit init since were not using any of the auto functions
   await init();
+  await overlay.init(dom.outputOverlay, human.faceTriangulation);
+  await mesh.init(dom.outputWireframe, human.faceTriangulation);
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   drawResults();
