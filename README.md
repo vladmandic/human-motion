@@ -1,10 +1,14 @@
 # Human: Motion Analytics Demo
 
-Using [**Human**](https://github.com/vladmandic/human) library
-
-- Analyze 2D input video: **Face**, **Body**, **Hands**
-- Track all keypoints in a *web worker* thread
-- Display **Video Overlay** or **3D Wireframe** with *pan/zoom/rotate* functionality
+- Input  
+  **Video file**  
+  **Live webcam**  
+- Analyze and track all keypoints in a *web worker* thread  
+  Using [**Human**](https://github.com/vladmandic/human) library  
+  **Face**, **Body**, **Hands**
+- Display  
+  **Video Overlay**  
+  **3D Wireframe** with *pan/zoom/rotate* functionality
 
 <br>
 

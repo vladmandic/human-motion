@@ -1,5 +1,6 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
 import * as BABYLON from 'babylonjs';
+import type { CustomWindow } from './globals';
 
 let canvas: HTMLCanvasElement;
 let engine: BABYLON.Engine;
@@ -15,15 +16,6 @@ let rightEye: BABYLON.Mesh;
 
 const handTubes: Record<string, BABYLON.Mesh> = {};
 const bodyTubes: Record<string, BABYLON.Mesh> = {};
-export interface CustomWindow extends Window {
-  engine: BABYLON.Engine,
-  scene: BABYLON.Scene,
-  camera: BABYLON.Camera,
-  light: BABYLON.DirectionalLight,
-  meshes: BABYLON.AbstractMesh[],
-  shadows: BABYLON.ShadowGenerator,
-  path: Record<string, BABYLON.Vector3[]>,
-}
 declare let window: CustomWindow;
 
 const wait = (ms: number) => new Promise((resolve) => { setTimeout(resolve, ms); });
@@ -52,10 +44,13 @@ export async function init(output: HTMLCanvasElement, triangulation: number[]) {
 
   // create environment
   const environment = scene.createDefaultEnvironment({
-    createSkybox: true,
+    createSkybox: false,
+    skyboxTexture: '../assets/backgroundSkybox.dds',
     createGround: true,
+    groundTexture: '../assets/backgroundGround.png',
     enableGroundShadow: true,
     groundColor: BABYLON.Color3.Red(),
+    // environmentTexture: '../assets/environmentSpecular.env',
   }) as BABYLON.EnvironmentHelper;
   environment.setMainColor(BABYLON.Color3.Gray());
 

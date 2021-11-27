@@ -34,6 +34,9 @@ const dom = {
   face: document.getElementById('face') as HTMLInputElement,
   body: document.getElementById('body') as HTMLInputElement,
   hand: document.getElementById('hand') as HTMLInputElement,
+  selectInput: document.getElementById('select-input') as HTMLSelectElement,
+  selectOutput: document.getElementById('select-output') as HTMLSelectElement,
+  webcam: document.getElementById('webcam') as HTMLButtonElement,
 };
 
 const log = (...msg: unknown[]) => {
@@ -87,6 +90,17 @@ async function receiveMessage(msg: MessageEvent) {
   if (!dom.input.paused) await requestDetect(); // if not paused request next frame
 }
 
+const resize = () => {
+  dom.input.width = dom.input.videoWidth;
+  dom.input.height = dom.input.videoHeight;
+  dom.outputOverlay.width = dom.input.videoWidth;
+  dom.outputOverlay.height = dom.input.videoHeight;
+  dom.outputWireframe.width = dom.input.videoWidth;
+  dom.outputWireframe.height = dom.input.videoHeight;
+  dom.outputAvatar.width = dom.input.videoWidth;
+  dom.outputAvatar.height = dom.input.videoHeight;
+};
+
 async function loadVideo(url: string, title?: string) {
   dom.status.innerText = 'loading video...';
   return new Promise((resolve, reject) => {
@@ -99,14 +113,7 @@ async function loadVideo(url: string, title?: string) {
       dom.input.controls = true;
       dom.input.playbackRate = 1.0;
       dom.status.innerText = '';
-      dom.input.width = dom.input.videoWidth;
-      dom.input.height = dom.input.videoHeight;
-      dom.outputOverlay.width = dom.input.videoWidth;
-      dom.outputOverlay.height = dom.input.videoHeight;
-      dom.outputWireframe.width = dom.input.videoWidth;
-      dom.outputWireframe.height = dom.input.videoHeight;
-      dom.outputAvatar.width = dom.input.videoWidth;
-      dom.outputAvatar.height = dom.input.videoHeight;
+      resize();
       log(`video: ${title || url} resolution: ${dom.input.videoWidth} x ${dom.input.videoHeight} duration: ${Math.trunc(dom.input.duration)}`);
       resolve(true);
     };
@@ -116,22 +123,46 @@ async function loadVideo(url: string, title?: string) {
   });
 }
 
+async function webcam() { // initialize webcam
+  // @ts-ignore resizeMode is not yet defined in tslib
+  const options: MediaStreamConstraints = { audio: false, video: { facingMode: 'user', resizeMode: 'crop-and-scale', width: { ideal: 1280 }, height: { ideal: 1280 } } };
+  const stream: MediaStream = await navigator.mediaDevices.getUserMedia(options);
+  const ready = new Promise((resolve) => { dom.input.onloadeddata = () => resolve(true); });
+  dom.input.srcObject = stream;
+  dom.input.play();
+  await ready;
+  resize();
+  const track: MediaStreamTrack = stream.getVideoTracks()[0];
+  const capabilities: MediaTrackCapabilities | string = track.getCapabilities ? track.getCapabilities() : '';
+  const settings: MediaTrackSettings | string = track.getSettings ? track.getSettings() : '';
+  const constraints: MediaTrackConstraints | string = track.getConstraints ? track.getConstraints() : '';
+  log('webcam:', dom.input.videoWidth, dom.input.videoHeight, track.label);
+  console.log({ stream, track, settings, constraints, capabilities });
+  dom.input.onclick = () => { // pause when clicked on screen and resume on next click
+    if (dom.input.paused) {
+      dom.input.play();
+      requestDetect();
+    } else {
+      dom.input.pause();
+    }
+  };
+  requestDetect();
+}
+
 async function init() {
-  const selectInput = document.getElementById('select-input') as HTMLSelectElement;
   for (const video of videos) {
     // const res = await fetch(video); // check if video exists
     // if (!res.ok) continue; // video not found
     const input = document.createElement('option');
     input.value = video;
     input.innerText = video;
-    selectInput.appendChild(input);
+    dom.selectInput.appendChild(input);
   }
-  selectInput.onchange = (ev: Event) => {
+  dom.selectInput.onchange = (ev: Event) => {
     const opt = (ev.target as HTMLSelectElement).options as HTMLOptionsCollection;
     if (opt[opt.selectedIndex].value && opt[opt.selectedIndex].value.length > 0) loadVideo(opt[opt.selectedIndex].value);
   };
-  const output = (document.getElementById('select-output') as HTMLSelectElement);
-  output.onchange = (ev: Event) => {
+  dom.selectOutput.onchange = (ev: Event) => {
     const selected = (ev.target as HTMLSelectElement).options.selectedIndex;
     dom.outputOverlay.style.display = selected === 1 ? 'block' : 'none';
     dom.outputWireframe.style.display = selected === 2 ? 'block' : 'none';
@@ -148,11 +179,7 @@ async function init() {
     };
     reader.readAsDataURL(file);
   };
-  /*
-  dom.face.onchange = () => { if (config.face) config.face.enabled = dom.face.checked; };
-  dom.body.onchange = () => { if (config.body) config.body.enabled = dom.body.checked; };
-  dom.hand.onchange = () => { if (config.hand) config.hand.enabled = dom.hand.checked; };
-  */
+  dom.webcam.onclick = () => webcam();
   const enabled = (face: boolean, body: boolean, hand: boolean) => {
     if (config.face) config.face.enabled = face;
     if (config.body) config.body.enabled = body;
@@ -178,6 +205,14 @@ async function main() {
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   drawResults();
+
+  /*
+  dom.body.click();
+  dom.selectInput.selectedIndex = 1;
+  loadVideo(dom.selectInput.value);
+  dom.selectOutput.selectedIndex = 3;
+  dom.outputAvatar.style.display = 'block';
+  */
 }
 
 window.onload = main;

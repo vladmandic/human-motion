@@ -1,12 +1,15 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
 import * as BABYLON from 'babylonjs';
-// import * as coords from './coords';
+import type { CustomWindow } from './globals';
+import * as coords from './coords';
 
 // const modelUrl = '../assets/skull.babylon';
 const modelUrl = '../assets/ybot.babylon'; // skull.babylon
 let engine: BABYLON.Engine;
 let scene: BABYLON.Scene;
 let camera: BABYLON.ArcRotateCamera;
+let skeleton: BABYLON.Skeleton;
+declare let window: CustomWindow;
 
 export async function init(canvas: HTMLCanvasElement) {
   console.log('initializing avatar');
@@ -33,14 +36,6 @@ export async function init(canvas: HTMLCanvasElement) {
   shadowGenerator.useBlurExponentialShadowMap = true;
   shadowGenerator.blurKernel = 32;
 
-  // expose on global object for diagnostics
-  /*
-  window.engine = engine;
-  window.scene = scene;
-  window.camera = camera;
-  window.meshes = scene.meshes;
-  */
-
   if (modelUrl.includes('skull')) {
     camera.setPosition(new BABYLON.Vector3(0, 10, -50));
     camera.setTarget(new BABYLON.Vector3(0, 5, 0));
@@ -56,7 +51,13 @@ export async function init(canvas: HTMLCanvasElement) {
   return new Promise((resolve) => {
     BABYLON.SceneLoader.ImportMesh('', '', modelUrl, scene, (meshes, _particles, skeletons) => {
       console.log('loaded avatar');
-      if (skeletons && skeletons.length > 0) skeletons[0].bones.forEach((bone) => { bone.name = bone.name.replace('mixamorig:', ''); }); // remap names from ybot
+      if (skeletons && skeletons.length > 0) {
+        skeleton = skeletons[0];
+        skeleton.name = 'ybot';
+        skeleton.bones.forEach((bone) => { bone.name = bone.name.replace('mixamorig:', ''); }); // remap names from ybot
+        skeleton.returnToRest();
+        window.skeleton = skeleton;
+      }
       shadowGenerator.addShadowCaster(scene.meshes[0], true);
       for (let index = 0; index < meshes.length; index++) meshes[index].receiveShadows = false;
       const helper = scene.createDefaultEnvironment({ enableGroundShadow: true }) as BABYLON.EnvironmentHelper;
@@ -68,9 +69,33 @@ export async function init(canvas: HTMLCanvasElement) {
   });
 }
 
+type Point = [number, number, number];
+const getBone = (name: string): (BABYLON.Bone | undefined) => skeleton.bones.find((bone) => bone.name === name) as BABYLON.Bone;
+const getPart = (body: H.BodyResult, name: string): (Point | undefined) => body.keypoints.find((kpt) => kpt.part === name)?.positionRaw as Point;
+
+const rad = (d0: number, d1: number): number => Math.atan2(d0, d1);
+
+const angle = (pt0: Point, pt1: Point) => ({
+  pitch: rad(pt0[0] - pt1[0], pt0[1] - pt1[1]),
+  roll: rad(pt0[1] - pt1[1], (pt0[2] - pt1[2]) / 256),
+  yaw: rad((pt0[2] - pt1[2]) / 256, pt0[0] - pt1[0]),
+});
+
 export async function draw(canvasOutput: HTMLCanvasElement, result: H.Result) {
   if (!scene) await init(canvasOutput);
-  if (result) {
+  if (result && result.body && result.body[0]) {
     // tbd
+    const body = result.body[0];
+    for (const pair of coords.pairs) {
+      const pt0 = getPart(body, pair[0]);
+      const pt1 = getPart(body, pair[1]);
+      const bone = getBone(pair[2]);
+      if (!pt0 || !pt1 || !bone) continue;
+      const a = angle(pt0, pt1);
+      console.log({ pair, pt0, pt1, bone, a });
+      // bone.setYawPitchRoll(a.yaw, a.pitch, a.roll);
+      bone.setYawPitchRoll(a.yaw, a.pitch, a.roll);
+      window.bone = bone;
+    }
   }
 }

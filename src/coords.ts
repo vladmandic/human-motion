@@ -1,58 +1,58 @@
 /* eslint-disable no-multi-spaces */
 
 export const kpt: Array<string> = [ // keypoints defined in blazepose
-  'nose',            //  0
-  'leftEyeInside',   //  1
-  'leftEye',         //  2
-  'leftEyeOutside',  //  3
-  'rightEyeInside',  //  4
-  'rightEye',        //  5
-  'rightEyeOutside', //  6
-  'leftEar',         //  7
-  'rightEar',        //  8
-  'leftMouth',       //  9
-  'rightMouth',      // 10
-  'leftShoulder',    // 11
-  'rightShoulder',   // 12
-  'leftElbow',       // 13
-  'rightElbow',      // 14
-  'leftWrist',       // 15
-  'rightWrist',      // 16
-  'leftPinky',       // 17
-  'rightPinky',      // 18
-  'leftIndex',       // 19
-  'rightIndex',      // 20
-  'leftThumb',       // 21
-  'rightThumb',      // 22
-  'leftHip',         // 23
-  'rightHip',        // 24
-  'leftKnee',        // 25
-  'rightKnee',       // 26
-  'leftAnkle',       // 27
-  'rightAnkle',      // 28
-  'leftHeel',        // 29
-  'rightHeel',       // 30
-  'leftFoot',        // 31
-  'rightFoot',       // 32
+  'Nose',            //  0
+  'LeftEyeInside',   //  1
+  'LeftEye',         //  2
+  'LeftEyeOutside',  //  3
+  'RightEyeInside',  //  4
+  'RightEye',        //  5
+  'RightEyeOutside', //  6
+  'LeftEar',         //  7
+  'RightEar',        //  8
+  'LeftMouth',       //  9
+  'RightMouth',      // 10
+  'LeftShoulder',    // 11
+  'RightShoulder',   // 12
+  'LeftElbow',       // 13
+  'RightElbow',      // 14
+  'LeftWrist',       // 15
+  'RightWrist',      // 16
+  'LeftPinky',       // 17
+  'RightPinky',      // 18
+  'LeftIndex',       // 19
+  'RightIndex',      // 20
+  'LeftThumb',       // 21
+  'RightThumb',      // 22
+  'LeftHip',         // 23
+  'RightHip',        // 24
+  'LeftKnee',        // 25
+  'RightKnee',       // 26
+  'LeftAnkle',       // 27
+  'RightAnkle',      // 28
+  'LeftHeel',        // 29
+  'RightHeel',       // 30
+  'LeftFoot',        // 31
+  'RightFoot',       // 32
   'bodyCenter',      // 33
   'bodyTop',         // 34
-  'leftPalm',        // 35 // z-coord not ok
-  'leftHand',        // 36 // z-coord not ok // similar to wrist
-  'rightPalm',       // 37 // z-coord not ok
-  'rightHand',       // 38 // z-coord not ok // similar to wrist
+  'LeftPalm',        // 35 // z-coord not ok
+  'LeftHand',        // 36 // z-coord not ok // similar to wrist
+  'RightPalm',       // 37 // z-coord not ok
+  'RightHand',       // 38 // z-coord not ok // similar to wrist
 ];
 
 export const connected: Record<string, string[]> = {
-  leftLeg: ['leftHip', 'leftKnee', 'leftAnkle', 'leftHeel', 'leftFoot'],
-  rightLeg: ['rightHip', 'rightKnee', 'rightAnkle', 'rightHeel', 'rightFoot'],
-  torso: ['leftShoulder', 'rightShoulder', 'rightHip', 'leftHip', 'leftShoulder', 'rightShoulder'],
-  leftArm: ['leftShoulder', 'leftElbow', 'leftWrist', 'leftPalm'],
-  rightArm: ['rightShoulder', 'rightElbow', 'rightWrist', 'rightPalm'],
-  leftEye: ['leftEyeInside', 'leftEye', 'leftEyeOutside'],
-  rightEye: ['rightEyeInside', 'rightEye', 'rightEyeOutside'],
-  mouth: ['leftMouth', 'rightMouth'],
-  // leftHand: ['leftHand', 'leftPalm', 'leftPinky', 'leftPalm', 'leftIndex', 'leftPalm', 'leftThumb'],
-  // rightHand: ['rightHand', 'rightPalm', 'rightPinky', 'rightPalm', 'rightIndex', 'rightPalm', 'rightThumb'],
+  LeftLeg: ['LeftHip', 'LeftKnee', 'LeftAnkle', 'LeftHeel', 'LeftFoot'],
+  RightLeg: ['RightHip', 'RightKnee', 'RightAnkle', 'RightHeel', 'RightFoot'],
+  torso: ['LeftShoulder', 'RightShoulder', 'RightHip', 'LeftHip', 'LeftShoulder', 'RightShoulder'],
+  LeftArm: ['LeftShoulder', 'LeftElbow', 'LeftWrist', 'LeftPalm'],
+  RightArm: ['RightShoulder', 'RightElbow', 'RightWrist', 'RightPalm'],
+  LeftEye: ['LeftEyeInside', 'LeftEye', 'LeftEyeOutside'],
+  RightEye: ['RightEyeInside', 'RightEye', 'RightEyeOutside'],
+  mouth: ['LeftMouth', 'RightMouth'],
+  // LeftHand: ['LeftHand', 'LeftPalm', 'LeftPinky', 'LeftPalm', 'LeftIndex', 'LeftPalm', 'LeftThumb'],
+  // RightHand: ['RightHand', 'RightPalm', 'RightPinky', 'RightPalm', 'RightIndex', 'RightPalm', 'RightThumb'],
 };
 
 export const bones: Array<string> = [ // keypoints defined in babylon `skeleton.bones[].name`
@@ -123,4 +123,9 @@ export const bones: Array<string> = [ // keypoints defined in babylon `skeleton.
   'LeftFoot',
   'LeftToeBase',
   'LeftToe_End',
+];
+
+export const pairs = [
+  ['leftShoulder', 'leftElbow', 'LeftShoulder'],
+  ['leftElbow', 'leftWrist', 'LeftForeArm'],
 ];
