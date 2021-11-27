@@ -98,7 +98,6 @@ export async function face(scale: [number, number], f: H.FaceResult) {
 }
 
 export async function init(output: HTMLCanvasElement, faceTriangulation: number[]) {
-  console.log('initializing overlay');
   canvas = output;
   triangulation = faceTriangulation;
   ctx = canvas.getContext('2d') as CanvasRenderingContext2D;

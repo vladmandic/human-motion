@@ -8,7 +8,7 @@
   **Face**, **Body**, **Hands**
 - Display  
   **Video Overlay**  
-  **3D Wireframe** with *pan/zoom/rotate* functionality
+  **3D Mesh Wireframe** with *pan/zoom/rotate* functionality
 
 <br>
 
@@ -53,7 +53,7 @@
   - Interpolates last known detection results
   - Calls draw in a chosen output module
     - Video Overlay is drawn using built-in functions in `Human` library
-    - 3D Wireframe is drawn using `BabylonJS`
+    - 3D Mesh Wireframe is drawn using `BabylonJS`
 
 <br>
 
@@ -69,7 +69,7 @@ If you want to use it, change `dependencies` in `package.json` to packages publi
 
 ## Todo
 
-- Wireframe: Cleanup on scene change
+- Wireframe: Cleanup meshes on model change
 - Models: Body box tracking within frame
 - Avatar: Animate Body
 - Avatar: Animate Skull
