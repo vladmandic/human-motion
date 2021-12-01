@@ -1,5 +1,7 @@
 # Human: Motion Analytics Demo
 
+*This project is released as preview and is still in a development phase*
+
 - Input  
   **Video file**  
   **Live webcam**  
