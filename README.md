@@ -10,7 +10,7 @@
   **Face**, **Body**, **Hands**
 - Display  
   **Video Overlay**  
-  **3D Mesh Wireframe** with *pan/zoom/rotate* functionality
+  **3D Mesh** with *pan/zoom/rotate* functionality
 
 <br>
 
@@ -31,7 +31,6 @@
   are not supported due to performance reasons  
 - System with discrete **GPU**  
   integrated GPUs are not supported due to performance reasons  
-- Avatar output is currently not enabled
 - For optimal results video should be square with single person approximately in the center of the frame  
   example *FullHD* video trimmed with start/duration, cropped to center square and compressed:
   > ffmpeg \
@@ -55,7 +54,7 @@
   - Interpolates last known detection results
   - Calls draw in a chosen output module
     - Video Overlay is drawn using built-in functions in `Human` library
-    - 3D Mesh Wireframe is drawn using `BabylonJS`
+    - 3D Mesh is drawn using `BabylonJS`
 
 <br>
 
@@ -68,10 +67,3 @@ If you want to use it, change `dependencies` in `package.json` to packages publi
 - `npm run dev`: run dev http server and watch for source changes
 
 <br>
-
-## Todo
-
-- Wireframe: Cleanup meshes on model change
-- Models: Body box tracking within frame
-- Avatar: Animate Body
-- Avatar: Animate Skull

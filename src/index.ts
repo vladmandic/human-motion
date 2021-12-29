@@ -2,7 +2,6 @@ import * as H from '@vladmandic/human';
 import * as BABYLON from 'babylonjs';
 import * as overlay from './overlay';
 import * as mesh from './mesh';
-import * as avatar from './avatar';
 
 const width = 512;
 const height = 512;
@@ -33,8 +32,7 @@ const dom = { // pointers to dom objects
   log: document.getElementById('log') as HTMLPreElement,
   interpolate: document.getElementById('interpolate') as HTMLInputElement,
   outputOverlay: document.getElementById('output-overlay') as HTMLCanvasElement,
-  outputWireframe: document.getElementById('output-wireframe') as HTMLCanvasElement,
-  outputAvatar: document.getElementById('output-avatar') as HTMLCanvasElement,
+  outputMesh: document.getElementById('output-mesh') as HTMLCanvasElement,
   face: document.getElementById('face') as HTMLInputElement,
   body: document.getElementById('body') as HTMLInputElement,
   hand: document.getElementById('hand') as HTMLInputElement,
@@ -60,9 +58,8 @@ async function drawResults() {
       drawTimestamp = now;
       const interpolated = dom.interpolate.checked ? await human.next(result) : result; // interpolation is optional
       const opt = (document.getElementById('select-output') as HTMLSelectElement).options;
-      if (opt.selectedIndex === 1) await overlay.draw(width, height, interpolated, dom.input);
-      else if (opt.selectedIndex === 2) await mesh.draw(width, height, interpolated);
-      else if (opt.selectedIndex === 3) await avatar.draw(interpolated);
+      if (opt.selectedIndex === 0) await overlay.draw(width, height, interpolated, dom.input);
+      else if (opt.selectedIndex === 1) await mesh.draw(width, height, interpolated);
       else dom.status.innerText = 'select output';
     }
   }
@@ -98,10 +95,8 @@ const resize = () => {
   dom.input.height = dom.input.videoHeight;
   dom.outputOverlay.width = dom.input.videoWidth;
   dom.outputOverlay.height = dom.input.videoHeight;
-  dom.outputWireframe.width = dom.input.videoWidth;
-  dom.outputWireframe.height = dom.input.videoHeight;
-  dom.outputAvatar.width = dom.input.videoWidth;
-  dom.outputAvatar.height = dom.input.videoHeight;
+  dom.outputMesh.width = dom.input.videoWidth;
+  dom.outputMesh.height = dom.input.videoHeight;
 };
 
 // load video from url
@@ -163,9 +158,8 @@ async function init() {
   };
   dom.selectOutput.onchange = (ev: Event) => { // event when output is changed
     const selected = (ev.target as HTMLSelectElement).options.selectedIndex;
-    dom.outputOverlay.style.display = selected === 1 ? 'block' : 'none';
-    dom.outputWireframe.style.display = selected === 2 ? 'block' : 'none';
-    dom.outputAvatar.style.display = selected === 3 ? 'block' : 'none';
+    dom.outputOverlay.style.display = selected === 0 ? 'block' : 'none';
+    dom.outputMesh.style.display = selected === 1 ? 'block' : 'none';
   };
   dom.file.onchange = (ev: Event) => { // event when loading video from file
     ev.preventDefault();
@@ -179,13 +173,11 @@ async function init() {
   };
   dom.webcam.onclick = () => webcam(); // event to use webcam as video input
   const enabled = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
+    mesh.init(dom.outputMesh, human.faceTriangulation);
     if (config.face) config.face.enabled = face;
     if (config.body) config.body.enabled = body;
     if (config.hand) config.hand.enabled = hand;
     log(`selected model: ${face ? human.config.face.mesh?.modelPath : ''}${body ? human.config.body.modelPath : ''}${hand ? human.config.hand.detector?.modelPath : ''}`);
-    if (face) mesh.position('face');
-    if (body) mesh.position('body');
-    if (hand) mesh.position('hand');
   };
   dom.face.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
   dom.body.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
@@ -200,20 +192,17 @@ async function main() {
   await init();
   // init modules each in its own canvas
   await overlay.init(dom.outputOverlay, human.faceTriangulation);
-  await mesh.init(dom.outputWireframe, human.faceTriangulation);
-  await avatar.init(dom.outputAvatar);
+  // await mesh.init(dom.outputMesh, human.faceTriangulation);
   dom.status.innerText = 'ready...';
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   drawResults();
 
-  /*
-  dom.body.click();
-  dom.selectInput.selectedIndex = 1;
-  loadVideo(dom.selectInput.value);
-  dom.selectOutput.selectedIndex = 3;
-  dom.outputAvatar.style.display = 'block';
-  */
+  // dom.hand.click();
+  // dom.selectInput.selectedIndex = 3;
+  // loadVideo(dom.selectInput.value);
+  dom.selectOutput.selectedIndex = 1;
+  dom.outputMesh.style.display = 'block';
 }
 
 window.onload = main;

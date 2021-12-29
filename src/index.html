@@ -24,8 +24,7 @@
     <div id="media" style="display: flex">
       <video id="input" style="width: 50%; height: auto" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
       <canvas id="output-overlay" style="width: 50%; height: auto; display: none"></canvas>
-      <canvas id="output-wireframe" style="width: 50%; height: auto; display: none"></canvas>
-      <canvas id="output-avatar" style="width: 50%; height: auto; display: none"></canvas>
+      <canvas id="output-mesh" style="width: 50%; height: auto; display: none"></canvas>
     </div>
     <div id="selections" style="margin: 8px; line-height: 32px">
       <span>select model
@@ -50,10 +49,8 @@
       <br>
       <span >select output
         <select id="select-output" name="select-output" title="select-output" style="margin-left: 8px" class="input">
-          <option value="" selected>&nbsp;</option>
           <option value="overlay">video overlay</option>
-          <option value="wireframe">3d wireframe</option>
-          <option value="avatar">avatar</option>
+          <option value="mesh" selected>3d model</option>
         </select>
         <label style="margin-left: 24px; margin-right: 8px" for="interpolate">with interpolation</label>
         <input type="checkbox" id="interpolate" style="vertical-align: middle; width: 18px; height: 18px" name="interpolate" value="interpolate" checked> 
