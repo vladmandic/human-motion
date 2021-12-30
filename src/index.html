@@ -28,23 +28,25 @@
     </div>
     <div id="selections" style="margin: 8px; line-height: 32px">
       <span>select model
-        <input type="radio" id="face" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <input type="checkbox" id="face" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="face">face</label>
-        <input type="radio" id="body" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <input type="checkbox" id="body" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="body">body</label>
-        <input type="radio" id="hand" style="margin-left: 24px; vertical-align: text-bottom; width: 18px; height: 18px" name="models"> 
+        <input type="checkbox" id="hand" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="hand">hands</label>
       </span>
       <br>
-      <span >select video
-        <select id="select-input" name="select-input" title="select-input" style="margin-left: 18px" class="input"></select>
-      </span>
-      <span>
-        <label style="margin-left: 24px; background: white; color: black; padding: 4px 12px 4px 12px" for="file-input">upload video</label>
-        <input type="file" id="file-input" style="display: none">
-      </span>
-      <span>
-        <button id="webcam" class="input" style="width: 120px; margin-left: 24px; background: white; color: black; padding: 2px 12px 2px 12px; border: none">use webcam</button>
+      <span>select input
+        <span>
+          <select id="select-input" name="select-input" title="select-input" style="margin-left: 20px" class="input"></select>
+        </span>
+        <span>
+          <label style="margin-left: 24px; background: white; color: black; padding: 4px 12px 4px 12px" for="file-input">upload video</label>
+          <input type="file" id="file-input" style="display: none">
+        </span>
+        <span>
+          <button id="webcam" class="input" style="width: 120px; margin-left: 24px; background: white; color: black; padding: 2px 12px 2px 12px; border: none">use webcam</button>
+        </span> 
       </span>
       <br>
       <span >select output
@@ -52,8 +54,6 @@
           <option value="overlay">video overlay</option>
           <option value="mesh" selected>3d model</option>
         </select>
-        <label style="margin-left: 24px; margin-right: 8px" for="interpolate">with interpolation</label>
-        <input type="checkbox" id="interpolate" style="vertical-align: middle; width: 18px; height: 18px" name="interpolate" value="interpolate" checked> 
       </span>
     </div>
     <pre id="log" style="padding: 8px"></pre>

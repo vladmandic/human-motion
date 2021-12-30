@@ -48,14 +48,13 @@ export function centerCamera(ms: number, points: H.Point[]) {
   const target = { x: (range.max[0] - range.min[0]) / 2 + range.min[0], y: (range.max[1] - range.min[1]) / 2 + range.min[1], z: 0 };
   const position = { x: (range.max[0] - range.min[0]) / 2 + range.min[0], y: range.max[1], z: -13 };
   moveCamera(target, position);
-  console.log({ target, position, range });
 }
 
 const pathLength = (path: Array<BABYLON.Vector3>): number => Math.abs(BABYLON.Vector3.Distance(path[0], path[path.length - 1]) * 0.1);
 
 const drawPath = (desc: string, path: Array<BABYLON.Vector3>) => {
   if (!t.initialized) return;
-  const diameter = pathLength(path) + 0.005;
+  const diameter = 0.5 * pathLength(path) + 0.015;
   if (!meshes[desc]) { // body part seen for the first time
     meshes[desc] = BABYLON.MeshBuilder.CreateTube(desc, { path, radius: diameter / 2, updatable: true, cap: 3, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, t.scene); // create new tube
     meshes[desc].material = t.materialBone;
@@ -74,6 +73,9 @@ const drawPath = (desc: string, path: Array<BABYLON.Vector3>) => {
 };
 
 async function drawBody(result: H.BodyResult, scale: [number, number]) {
+  const norm = (coord: number[]): BABYLON.Vector3 => new BABYLON.Vector3(coord[0] / scale[0], 1 - (coord[1] / scale[1]), coord[2] / 2 / 256);
+  const center = (coord: number[][]): number[] => [(coord[0][0] + coord[1][0]) / coord.length, (coord[0][1] + coord[1][1]) / coord.length, (coord[0][2] + coord[1][2]) / coord.length];
+
   const drawHead = () => {
     if (!t.initialized) return;
     if (!meshes.head) {
@@ -84,9 +86,15 @@ async function drawBody(result: H.BodyResult, scale: [number, number]) {
     const re = (result.keypoints.find((kpt) => kpt.part === 'rightEye') as H.BodyKeypoint).position as [number, number, number];
     const ls = (result.keypoints.find((kpt) => kpt.part === 'leftShoulder') as H.BodyKeypoint).position as [number, number, number];
     const rs = (result.keypoints.find((kpt) => kpt.part === 'rightShoulder') as H.BodyKeypoint).position as [number, number, number];
-    meshes.head.position = new BABYLON.Vector3((le[0] + re[0]) / 2 / scale[0], 1 - ((le[1] + re[1]) / 2 / scale[1]), (le[2] + re[2] + ls[2] + rs[2]) / 4 / 256 / 2); // head position is half way between both eyes and shoulders
-    const headSize = 0.8 * pathLength([new BABYLON.Vector3(...le), new BABYLON.Vector3(...re)]); // head size is proportionate to distance between eyes
-    meshes.head.scaling = new BABYLON.Vector3(headSize, headSize, headSize);
+    const eyeBase = center([le, re]);
+    const neckBase = center([ls, rs]);
+    const neckEnd = center([neckBase, eyeBase]);
+    const neck = [norm(neckBase), norm(neckEnd)];
+    drawPath('neck', neck);
+    const head = center([neckEnd, eyeBase]);
+    meshes.head.position = norm(head);
+    const headSize = 0.5 * pathLength([new BABYLON.Vector3(...le), new BABYLON.Vector3(...re)]) + 0.2; // head size is proportionate to distance between eyes
+    meshes.head.scaling = new BABYLON.Vector3(headSize, 1.1 * headSize, headSize);
   };
 
   if (!t.initialized) centerCamera(1000, result.keypoints.filter((kpt) => kpt.score > 0).map((kpt) => kpt.positionRaw)); // first draw
@@ -105,9 +113,7 @@ async function drawHand(result: H.HandResult, scale: [number, number]) {
   for (const [desc, parts] of Object.entries(result.annotations)) {
     const path: Array<BABYLON.Vector3> = [];
     for (const pt of parts) {
-      if (pt[0] > 0 && pt[1] > 0) {
-        path.push(new BABYLON.Vector3(pt[0] / scale[0], 1 - (pt[1] / scale[1]), (pt[2] || 0) / 256 / 2));
-      }
+      if (pt[0] > 0 && pt[1] > 0) path.push(new BABYLON.Vector3(pt[0] / scale[0], 1 - (pt[1] / scale[1]), (pt[2] || 0) / 256 / 2));
     }
     if (path.length > 1) drawPath(desc, path);
   }

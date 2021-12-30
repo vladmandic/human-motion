@@ -36,11 +36,12 @@ export class Scene {
     this.materialBone.useSpecularOverAlpha = true;
     this.materialJoint = new BABYLON.StandardMaterial('materialTube', this.scene);
     this.materialJoint.diffuseColor = new BABYLON.Color3(0.2, 0.5, 0.5);
-    this.materialJoint.alpha = 1.0;
+    this.materialJoint.alpha = 0.6;
     this.materialJoint.useSpecularOverAlpha = true;
     this.materialHead = new BABYLON.StandardMaterial('materialHead', this.scene);
     this.materialHead.diffuseColor = new BABYLON.Color3(0.6, 1.0, 1.0);
     this.materialHead.specularColor = new BABYLON.Color3(0.6, 1.0, 1.0);
+    this.materialHead.alpha = 0.7;
     this.materialHead.specularPower = 0;
     this.highlight = new BABYLON.HighlightLayer('highlight', this.scene);
     // start scene

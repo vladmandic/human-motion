@@ -17,7 +17,7 @@ const config: Partial<H.Config> = {
   object: { enabled: false },
   gesture: { enabled: false },
 };
-const videos = ['', '../assets/BaseballPitch.mp4', '../assets/FaceModel.mp4', '../assets/ASLSignAlphabet.mp4', '../assets/ContemporaryDance.mp4', '../assets/FloorGymnast.mp4'];
+const videos = ['[sample video]', '../assets/BaseballPitch.mp4', '../assets/FaceModel.mp4', '../assets/ASLSignAlphabet.mp4', '../assets/ContemporaryDance.mp4', '../assets/FloorGymnast.mp4'];
 const human = new H.Human(config); // local instance of human used only to prepare input and interpolate results
 const worker = new Worker('../dist/worker.js'); // processing is done inside web worker
 let result: H.Result; // last known good result from human.detect
@@ -30,7 +30,6 @@ const dom = { // pointers to dom objects
   file: document.getElementById('file-input') as HTMLInputElement,
   status: document.getElementById('status') as HTMLPreElement,
   log: document.getElementById('log') as HTMLPreElement,
-  interpolate: document.getElementById('interpolate') as HTMLInputElement,
   outputOverlay: document.getElementById('output-overlay') as HTMLCanvasElement,
   outputMesh: document.getElementById('output-mesh') as HTMLCanvasElement,
   face: document.getElementById('face') as HTMLInputElement,
@@ -56,7 +55,7 @@ async function drawResults() {
     } else {
       dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)}`;
       drawTimestamp = now;
-      const interpolated = dom.interpolate.checked ? await human.next(result) : result; // interpolation is optional
+      const interpolated = await human.next(result); // interpolate results
       const opt = (document.getElementById('select-output') as HTMLSelectElement).options;
       if (opt.selectedIndex === 0) await overlay.draw(width, height, interpolated, dom.input);
       else if (opt.selectedIndex === 1) await mesh.draw(width, height, interpolated);
@@ -154,7 +153,7 @@ async function init() {
   }
   dom.selectInput.onchange = (ev: Event) => { // event when video is selected
     const opt = (ev.target as HTMLSelectElement).options as HTMLOptionsCollection;
-    if (opt[opt.selectedIndex].value && opt[opt.selectedIndex].value.length > 0) loadVideo(opt[opt.selectedIndex].value);
+    if (opt.selectedIndex > 0) loadVideo(opt[opt.selectedIndex].value);
   };
   dom.selectOutput.onchange = (ev: Event) => { // event when output is changed
     const selected = (ev.target as HTMLSelectElement).options.selectedIndex;
@@ -177,7 +176,11 @@ async function init() {
     if (config.face) config.face.enabled = face;
     if (config.body) config.body.enabled = body;
     if (config.hand) config.hand.enabled = hand;
-    log(`selected model: ${face ? human.config.face.mesh?.modelPath : ''}${body ? human.config.body.modelPath : ''}${hand ? human.config.hand.detector?.modelPath : ''}`);
+    const models = [];
+    if (face) models.push(human.config.face.detector?.modelPath, human.config.face.mesh?.modelPath);
+    if (body) models.push(human.config.body.modelPath);
+    if (hand) models.push(human.config.hand.detector?.modelPath, human.config.hand.skeleton?.modelPath);
+    log(`enabled models: ${models.join(' | ')}`);
   };
   dom.face.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
   dom.body.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);

@@ -20,8 +20,9 @@
     "@vladmandic/build": "github:vladmandic/build",
     "@vladmandic/human": "link:../human",
     "babylonjs": "^4.2.0",
-    "eslint": "^8.4.1",
+    "eslint": "^8.5.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3",
     "tslib": "^2.3.1",
     "typescript": "^4.5.4"
   }
