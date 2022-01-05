@@ -5,6 +5,7 @@
     "console": true
   },
   "profiles": {
+    "serve": ["serve"],
     "production": ["clean", "compile", "lint"],
     "development": ["serve", "watch", "compile"]
   },

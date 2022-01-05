@@ -1,6 +1,6 @@
 {
   "name": "human-motion",
-  "description": "Human: Motion Analytics Demo",
+  "description": "Realtime Face/Pose/Hand Motion 3D Model Visualization and 2D Overlay for using Human Library and BabylonJS",
   "license": "MIT",
   "author": "Vladimir Mandic <mandic00@live.com>",
   "version": "0.0.1",
@@ -13,16 +13,28 @@
   },
   "homepage": "https://github.com/vladmandic/human-motion#readme",
   "scripts": {
+    "start": "build --profile serve",
     "prod": "build --profile production",
     "dev": "build --profile development"
   },
+  "keywords": [
+    "human",
+    "human-library",
+    "face-detection",
+    "body-tracking",
+    "hand-tracking",
+    "avatar",
+    "skeleton",
+    "tfjs",
+    "tensorflowjs"
+  ],
   "dependencies": {
-    "@vladmandic/build": "github:vladmandic/build",
-    "@vladmandic/human": "link:../human",
+    "@vladmandic/build": "^0.6.6",
+    "@vladmandic/human": "github:vladmandic/human",
     "babylonjs": "^4.2.0",
-    "eslint": "^8.5.0",
+    "eslint": "^8.6.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-import": "^2.25.4",
     "tslib": "^2.3.1",
     "typescript": "^4.5.4"
   }
