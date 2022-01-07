@@ -17,7 +17,7 @@ const config: Partial<H.Config> = {
   object: { enabled: false },
   gesture: { enabled: false },
 };
-const videos = ['[sample video]', '../assets/BaseballPitch.mp4', '../assets/FaceModel.mp4', '../assets/ASLSignAlphabet.mp4', '../assets/ContemporaryDance.mp4', '../assets/FloorGymnast.mp4'];
+const videos = ['[sample video]', '../assets/BaseballPitch.mp4', '../assets/FaceModel.mp4', '../assets/ASLSignAlphabet.mp4', '../assets/ContemporaryDance.mp4', '../assets/FloorGymnast.mp4', '../assets/TennisSlowMo.webm'];
 const human = new H.Human(config); // local instance of human used only to prepare input and interpolate results
 const worker = new Worker('../dist/worker.js'); // processing is done inside web worker
 let result: H.Result; // last known good result from human.detect
