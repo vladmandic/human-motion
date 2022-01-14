@@ -29,9 +29,9 @@
     "tensorflowjs"
   ],
   "dependencies": {
-    "@vladmandic/build": "^0.6.6",
-    "@vladmandic/human": "github:vladmandic/human",
-    "babylonjs": "^4.2.0",
+    "@vladmandic/build": "^0.6.7",
+    "@vladmandic/human": "^2.5.8",
+    "babylonjs": "^4.2.1",
     "eslint": "^8.6.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
