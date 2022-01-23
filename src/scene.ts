@@ -59,20 +59,17 @@ export class Scene {
     // environment
     if (this.environment) this.environment.dispose();
     this.environment = this.scene.createDefaultEnvironment({
+      environmentTexture: '../assets/scene-environment.env',
       createSkybox: true,
+      skyboxTexture: '../assets/scene-skybox.dds',
+      skyboxColor: new BABYLON.Color3(0.0, 0.0, 0.0),
+      skyboxSize: 100,
       createGround: true,
-      skyboxTexture: '../assets/skybox',
-      skyboxColor: new BABYLON.Color3(0.7, 0.9, 1.0),
-      skyboxSize: 25,
-      cameraContrast: 2,
-      cameraExposure: 1,
-      groundColor: new BABYLON.Color3(0.3, 0.3, 0.3), // new BABYLON.Color3(0.0, 0.3, 0.5),
-      groundSize: 15,
-      groundShadowLevel: 0.4, // shadow darkness
-      groundTexture: '../assets/ground.png',
+      groundColor: new BABYLON.Color3(1.0, 1.0, 1.0),
+      groundSize: 10,
+      groundShadowLevel: 0.1,
+      groundTexture: '../assets/scene-ground.png',
       enableGroundShadow: true,
-      enableGroundMirror: false,
-      environmentTexture: '../assets/environment.env',
     }) as BABYLON.EnvironmentHelper;
     // lights
     if (this.ambient) this.ambient.dispose();
