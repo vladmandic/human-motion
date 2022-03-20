@@ -29,10 +29,10 @@
     "tensorflowjs"
   ],
   "dependencies": {
-    "@vladmandic/build": "^0.7.1",
+    "@vladmandic/build": "^0.7.2",
     "@vladmandic/human": "^2.6.4",
-    "babylonjs": "^4.2.1",
-    "eslint": "^8.10.0",
+    "babylonjs": "^4.2.2",
+    "eslint": "^8.11.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
     "tslib": "^2.3.1",
