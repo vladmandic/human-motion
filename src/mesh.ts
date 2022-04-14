@@ -1,5 +1,6 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
-import * as BABYLON from 'babylonjs';
+
+import * as BABYLON from '@babylonjs/core';
 import { Scene } from './scene';
 
 let t: Scene;
@@ -8,6 +9,8 @@ let meshes: Record<string, BABYLON.Mesh> = {};
 
 export function init(canvasOutput: HTMLCanvasElement, triangulation: number[]) {
   if (!t) t = new Scene(canvasOutput, 2, 1000);
+  // t.scene.debugLayer.show({ embedMode: true, overlay: false, showExplorer: true, showInspector: true });
+
   t.initialized = false;
   faceTriangulation = triangulation;
   for (const mesh of Object.values(meshes)) mesh.dispose();
@@ -121,31 +124,43 @@ async function drawHand(result: H.HandResult, scale: [number, number]) {
 
 export async function drawFace(result: H.FaceResult) {
   if (!t.initialized) centerCamera(1000, result.meshRaw); // first draw
-  if (result.meshRaw.length !== 478) return;
+
+  // draw face
+  if (result.meshRaw.length < 468) return;
   if (!meshes.face) { // create new face
     meshes.face = new BABYLON.Mesh('face', t.scene);
-    meshes.leftEye = BABYLON.MeshBuilder.CreateSphere('leftEye', { diameter: 0.5, updatable: true }, t.scene);
-    meshes.rightEye = BABYLON.MeshBuilder.CreateSphere('rightEye', { diameter: 0.5, updatable: true }, t.scene);
     meshes.face.material = t.materialHead;
-    meshes.leftEye.material = t.materialJoint;
-    meshes.rightEye.material = t.materialJoint;
   }
   const positions = new Float32Array(3 * result.meshRaw.length);
   for (let i = 0; i < result.meshRaw.length; i++) { // flatten and invert-y
     positions[3 * i + 0] = result.meshRaw[i][0];
     positions[3 * i + 1] = 1 - 1.25 * result.meshRaw[i][1];
-    positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 2;
+    positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 1.5;
   }
   const faceVertexData: BABYLON.VertexData = new BABYLON.VertexData();
   faceVertexData.positions = positions;
   faceVertexData.indices = faceTriangulation;
   faceVertexData.applyToMesh(meshes.face, true);
 
+  // draw eye iris
+  if (result.meshRaw.length < 478) return;
+  if (!meshes.leftEye || !meshes.rightEye) { // create new iris
+    meshes.leftEye = BABYLON.MeshBuilder.CreateSphere('leftEye', { diameter: 0.5, updatable: true }, t.scene);
+    meshes.rightEye = BABYLON.MeshBuilder.CreateSphere('rightEye', { diameter: 0.5, updatable: true }, t.scene);
+    meshes.leftEye.material = t.materialJoint;
+    meshes.rightEye.material = t.materialJoint;
+  }
   const eyeSize = Math.abs(positions[3 * 469 + 0] - positions[3 * 471 + 0]) + Math.abs(positions[3 * 474 + 0] - positions[3 * 476 + 0]);
-  meshes.leftEye.position = new BABYLON.Vector3(positions[3 * 468 + 0], positions[3 * 468 + 1], positions[3 * 468 + 2] / 20);
+  meshes.leftEye.position = new BABYLON.Vector3(positions[3 * 468 + 0], positions[3 * 468 + 1], positions[3 * 468 + 2] / 10);
   meshes.leftEye.scaling = new BABYLON.Vector3(eyeSize, eyeSize, eyeSize);
-  meshes.rightEye.position = new BABYLON.Vector3(positions[3 * 473 + 0], positions[3 * 473 + 1], positions[3 * 473 + 2] / 20);
+  meshes.rightEye.position = new BABYLON.Vector3(positions[3 * 473 + 0], positions[3 * 473 + 1], positions[3 * 473 + 2] / 10);
   meshes.rightEye.scaling = new BABYLON.Vector3(eyeSize, eyeSize, eyeSize);
+
+  for (let i = 478; i < result.meshRaw.length; i++) {
+    const obj = `augment${i}`;
+    if (!meshes[obj]) meshes[obj] = BABYLON.MeshBuilder.CreateSphere(obj, { diameter: 0.005, updatable: true }, t.scene);
+    meshes[obj].position = new BABYLON.Vector3(positions[3 * i + 0], positions[3 * i + 1], positions[3 * i + 2] / 20);
+  }
 }
 
 export async function draw(width: number, height: number, result: H.Result) {

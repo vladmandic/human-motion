@@ -1,5 +1,5 @@
 import * as H from '@vladmandic/human';
-import * as BABYLON from 'babylonjs';
+import * as BABYLON from '@babylonjs/core';
 import * as overlay from './overlay';
 import * as mesh from './mesh';
 
@@ -10,20 +10,22 @@ const config: Partial<H.Config> = {
   backend: 'humangl' as const,
   modelBasePath: '../assets',
   cacheSensitivity: 0,
-  filter: { enabled: true, equalization: true, width, height },
-  face: { enabled: false, detector: { rotation: false }, mesh: { enabled: true }, iris: { enabled: true }, description: { enabled: false }, emotion: { enabled: false } },
+  filter: { enabled: true, equalization: false, width, height },
+  face: { enabled: false, detector: { rotation: false }, mesh: { enabled: true }, attention: { enabled: true }, iris: { enabled: true }, description: { enabled: false }, emotion: { enabled: false } },
   body: { enabled: false, minConfidence: 0.1, maxDetected: 1, modelPath: 'blazepose-heavy.json' },
   hand: { enabled: false, minConfidence: 0.1, maxDetected: 1, landmarks: true, rotation: false },
   object: { enabled: false },
   gesture: { enabled: false },
 };
-const videos = ['[sample video]', '../assets/BaseballPitch.mp4', '../assets/FaceModel.mp4', '../assets/ASLSignAlphabet.mp4'];
+const videos = ['[sample video]', '../assets/FaceModel.mp4', '../assets/BaseballPitch.mp4', '../assets/ASLSignAlphabet.mp4'];
 const human = new H.Human(config); // local instance of human used only to prepare input and interpolate results
 const worker = new Worker('../dist/worker.js'); // processing is done inside web worker
 let result: H.Result; // last known good result from human.detect
 let drawTimestamp = 0; // used to calculate fps
 let tensors = 0; // monitors tensor counts inside web worker
 let busy = false; // busy flag set when posted message to worker and cleared when received message from worker
+let totalTime = 0;
+let totalCount = 0;
 
 const dom = { // pointers to dom objects
   input: document.getElementById('input') as HTMLVideoElement,
@@ -50,10 +52,12 @@ async function drawResults() {
   if (result) {
     const now = Date.now();
     const age = now - result.timestamp;
-    if (age > 1000) { // let it run for 1 sec so interpolation caches up
+    if (age > 250) { // let it run for just a bit longer so interpolation caches up
       dom.status.innerText = 'paused';
     } else {
-      dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)}`;
+      totalTime += age;
+      totalCount += 1;
+      dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)} | avg${(1000 * totalCount / totalTime).toFixed(1).padStart(5)}`;
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
       const opt = (document.getElementById('select-output') as HTMLSelectElement).options;
@@ -117,6 +121,7 @@ async function loadVideo(url: string, title?: string) {
     };
     dom.input.onplay = () => requestDetect();
     dom.input.onseeked = () => requestDetect();
+    if (dom.input.srcObject) dom.input.srcObject = null;
     dom.input.src = url;
   });
 }
@@ -126,6 +131,7 @@ async function webcam() {
   const constraints = { audio: false, video: { facingMode: 'user', resizeMode: 'crop-and-scale', width: { ideal: 1280 }, height: { ideal: 1280 } } };
   const stream: MediaStream = await navigator.mediaDevices.getUserMedia(constraints);
   const ready = new Promise((resolve) => { dom.input.onloadeddata = () => resolve(true); });
+  if (dom.input.src) dom.input.src = '';
   dom.input.srcObject = stream;
   dom.input.play();
   await ready;
@@ -142,6 +148,19 @@ async function webcam() {
   };
   requestDetect();
 }
+
+// enable or disable a human model
+const enabled = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
+  mesh.init(dom.outputMesh, human.faceTriangulation);
+  if (config.face) config.face.enabled = face;
+  if (config.body) config.body.enabled = body;
+  if (config.hand) config.hand.enabled = hand;
+  const models = [];
+  if (face) models.push(human.config.face.detector?.modelPath, human.config.face.mesh?.modelPath);
+  if (body) models.push(human.config.body.modelPath);
+  if (hand) models.push(human.config.hand.detector?.modelPath, human.config.hand.skeleton?.modelPath);
+  log(`enabled models: ${models.join(' | ')}`);
+};
 
 // global initializer
 async function init() {
@@ -171,17 +190,6 @@ async function init() {
     reader.readAsDataURL(file);
   };
   dom.webcam.onclick = () => webcam(); // event to use webcam as video input
-  const enabled = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
-    mesh.init(dom.outputMesh, human.faceTriangulation);
-    if (config.face) config.face.enabled = face;
-    if (config.body) config.body.enabled = body;
-    if (config.hand) config.hand.enabled = hand;
-    const models = [];
-    if (face) models.push(human.config.face.detector?.modelPath, human.config.face.mesh?.modelPath);
-    if (body) models.push(human.config.body.modelPath);
-    if (hand) models.push(human.config.hand.detector?.modelPath, human.config.hand.skeleton?.modelPath);
-    log(`enabled models: ${models.join(' | ')}`);
-  };
   dom.face.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
   dom.body.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
   dom.hand.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
@@ -189,7 +197,7 @@ async function init() {
 
 async function main() {
   dom.status.innerText = 'loading...';
-  await human.validate(config);
+  await human.validate(config); // check for possible configuration errors
   await human.init(); // requires explicit init since were not using any of the auto functions
   log('human', human.version, '| tfjs', human.tf.version.tfjs, '| babylon', BABYLON.Engine.Version, '|', human.env.webgl.version?.toLowerCase());
   await init();
@@ -200,12 +208,13 @@ async function main() {
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   drawResults();
-
   // dom.hand.click();
   // dom.selectInput.selectedIndex = 3;
   // loadVideo(dom.selectInput.value);
   dom.selectOutput.selectedIndex = 1;
   dom.outputMesh.style.display = 'block';
+  enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
+  webcam();
 }
 
 window.onload = main;

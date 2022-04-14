@@ -26,7 +26,7 @@
     "httpsPort": 8001,
     "documentRoot": ".",
     "defaultFolder": "src",
-    "defaultFile": "precalc.html"
+    "defaultFile": "index.html"
   },
   "build": {
     "global": {

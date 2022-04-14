@@ -1,4 +1,4 @@
-import * as BABYLON from 'babylonjs';
+import * as BABYLON from '@babylonjs/core';
 
 export class Scene {
   engine!: BABYLON.Engine;
@@ -43,6 +43,7 @@ export class Scene {
     this.materialHead.specularColor = new BABYLON.Color3(0.6, 1.0, 1.0);
     this.materialHead.alpha = 0.7;
     this.materialHead.specularPower = 0;
+
     this.highlight = new BABYLON.HighlightLayer('highlight', this.scene);
     // start scene
     this.engine.runRenderLoop(() => this.scene.render());
