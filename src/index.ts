@@ -38,7 +38,6 @@ const dom = { // pointers to dom objects
   body: document.getElementById('body') as HTMLInputElement,
   hand: document.getElementById('hand') as HTMLInputElement,
   selectInput: document.getElementById('select-input') as HTMLSelectElement,
-  selectOutput: document.getElementById('select-output') as HTMLSelectElement,
   webcam: document.getElementById('webcam') as HTMLButtonElement,
 };
 
@@ -52,7 +51,7 @@ async function drawResults() {
   if (result) {
     const now = Date.now();
     const age = now - result.timestamp;
-    if (age > 250) { // let it run for just a bit longer so interpolation caches up
+    if (age > 500) { // let it run for just a bit longer so interpolation caches up
       dom.status.innerText = 'paused';
     } else {
       totalTime += age;
@@ -60,10 +59,8 @@ async function drawResults() {
       dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)} | avg${(1000 * totalCount / totalTime).toFixed(1).padStart(5)}`;
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
-      const opt = (document.getElementById('select-output') as HTMLSelectElement).options;
-      if (opt.selectedIndex === 0) await overlay.draw(width, height, interpolated, dom.input);
-      else if (opt.selectedIndex === 1) await mesh.draw(width, height, interpolated);
-      else dom.status.innerText = 'select output';
+      overlay.draw(width, height, interpolated, dom.input);
+      mesh.draw(width, height, interpolated);
     }
   }
   requestAnimationFrame(() => drawResults());
@@ -127,7 +124,7 @@ async function loadVideo(url: string, title?: string) {
 }
 
 // initialize webcam and set video to use webcam as source
-async function webcam() {
+async function startWebCam() {
   const constraints = { audio: false, video: { facingMode: 'user', resizeMode: 'crop-and-scale', width: { ideal: 1280 }, height: { ideal: 1280 } } };
   const stream: MediaStream = await navigator.mediaDevices.getUserMedia(constraints);
   const ready = new Promise((resolve) => { dom.input.onloadeddata = () => resolve(true); });
@@ -150,7 +147,7 @@ async function webcam() {
 }
 
 // enable or disable a human model
-const enabled = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
+const enableModels = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
   mesh.init(dom.outputMesh, human.faceTriangulation);
   if (config.face) config.face.enabled = face;
   if (config.body) config.body.enabled = body;
@@ -174,11 +171,6 @@ async function init() {
     const opt = (ev.target as HTMLSelectElement).options as HTMLOptionsCollection;
     if (opt.selectedIndex > 0) loadVideo(opt[opt.selectedIndex].value);
   };
-  dom.selectOutput.onchange = (ev: Event) => { // event when output is changed
-    const selected = (ev.target as HTMLSelectElement).options.selectedIndex;
-    dom.outputOverlay.style.display = selected === 0 ? 'block' : 'none';
-    dom.outputMesh.style.display = selected === 1 ? 'block' : 'none';
-  };
   dom.file.onchange = (ev: Event) => { // event when loading video from file
     ev.preventDefault();
     if (!dom.file.files || !dom.file.files[0]) return;
@@ -189,10 +181,10 @@ async function init() {
     };
     reader.readAsDataURL(file);
   };
-  dom.webcam.onclick = () => webcam(); // event to use webcam as video input
-  dom.face.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
-  dom.body.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
-  dom.hand.onchange = () => enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
+  dom.webcam.onclick = () => startWebCam(); // event to use webcam as video input
+  dom.face.onchange = () => enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);
+  dom.body.onchange = () => enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);
+  dom.hand.onchange = () => enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);
 }
 
 async function main() {
@@ -203,18 +195,13 @@ async function main() {
   await init();
   // init modules each in its own canvas
   await overlay.init(dom.outputOverlay, human.faceTriangulation);
-  // await mesh.init(dom.outputMesh, human.faceTriangulation);
+  await mesh.init(dom.outputMesh, human.faceTriangulation);
   dom.status.innerText = 'ready...';
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   drawResults();
-  // dom.hand.click();
-  // dom.selectInput.selectedIndex = 3;
-  // loadVideo(dom.selectInput.value);
-  dom.selectOutput.selectedIndex = 1;
-  dom.outputMesh.style.display = 'block';
-  enabled(dom.face.checked, dom.body.checked, dom.hand.checked);
-  webcam();
+  enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);
+  startWebCam();
 }
 
 window.onload = main;

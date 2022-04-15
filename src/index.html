@@ -22,9 +22,9 @@
   <body>
     <pre id="status" style="position: absolute; top: 12px; right: 20px; background-color: grey; padding: 8px; box-shadow: 2px 2px black"></pre>
     <div id="media" style="display: flex">
-      <video id="input" style="width: 50%; height: auto" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
-      <canvas id="output-overlay" style="width: 50%; height: auto; display: none"></canvas>
-      <canvas id="output-mesh" style="width: 50%; height: auto; display: none"></canvas>
+      <video id="input" style="width: 33%; height: auto" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
+      <canvas id="output-overlay" style="width: 33%; height: auto"></canvas>
+      <canvas id="output-mesh" style="width: 33%; height: auto"></canvas>
     </div>
     <div id="selections" style="margin: 8px; line-height: 32px">
       <span>select model
@@ -49,11 +49,6 @@
         </span> 
       </span>
       <br>
-      <span >select output
-        <select id="select-output" name="select-output" title="select-output" style="margin-left: 8px" class="input">
-          <option value="overlay">video overlay</option>
-          <option value="mesh" selected>3d model</option>
-        </select>
       </span>
     </div>
     <pre id="log" style="padding: 8px"></pre>
