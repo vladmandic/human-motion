@@ -5,14 +5,17 @@ import { Scene } from './scene';
 
 let t: Scene;
 let faceTriangulation: number[];
+let faceUVMap: [number, number][];
 let meshes: Record<string, BABYLON.Mesh> = {};
+let faceVertexData: BABYLON.VertexData;
 
-export function init(canvasOutput: HTMLCanvasElement, triangulation: number[]) {
+export function init(canvasOutput: HTMLCanvasElement, triangulation: number[], uvmap: [number, number][]) {
   if (!t) t = new Scene(canvasOutput, 2, 1000);
   // t.scene.debugLayer.show({ embedMode: true, overlay: false, showExplorer: true, showInspector: true });
 
   t.initialized = false;
   faceTriangulation = triangulation;
+  faceUVMap = uvmap;
   for (const mesh of Object.values(meshes)) mesh.dispose();
   meshes = {};
 }
@@ -133,20 +136,38 @@ export async function drawFace(result: H.FaceResult) {
   }
   const positions = new Float32Array(3 * result.meshRaw.length);
   for (let i = 0; i < result.meshRaw.length; i++) { // flatten and invert-y
-    positions[3 * i + 0] = result.meshRaw[i][0];
-    positions[3 * i + 1] = 1 - 1.25 * result.meshRaw[i][1];
-    positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 1.5;
+    positions[3 * i + 0] = result.meshRaw[i][0]; // x
+    positions[3 * i + 1] = 1 - 1.25 * result.meshRaw[i][1]; // y
+    positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 1.5; // z
   }
-  const faceVertexData: BABYLON.VertexData = new BABYLON.VertexData();
-  faceVertexData.positions = positions;
-  faceVertexData.indices = faceTriangulation;
-  faceVertexData.applyToMesh(meshes.face, true);
+
+  // create vertex buffer if on first access
+  if (!faceVertexData) {
+    faceVertexData = new BABYLON.VertexData();
+    faceVertexData.positions = positions;
+    faceVertexData.indices = faceTriangulation;
+    faceVertexData.uvs = faceUVMap.flat();
+    faceVertexData.applyToMesh(meshes.face, true);
+  }
+  meshes.face.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, true); // update uvmap positions
+
+  // draw original image as texture
+  /*
+  const faceCanvasCtx = t.textureHead.getContext();
+  const input = document.getElementById('input') as HTMLVideoElement;
+  const box = [Math.trunc(input.videoWidth * result.boxRaw[0]), Math.trunc(input.videoHeight * result.boxRaw[1]), Math.trunc(input.videoWidth * result.boxRaw[2]), Math.trunc(input.videoHeight * result.boxRaw[3])];
+  faceCanvasCtx.setTransform(1, 0, 0, -1, 0, faceCanvasCtx.canvas.height);
+  faceCanvasCtx.drawImage(input, box[0], box[1], box[2], box[3], 0, 0, faceCanvasCtx.canvas.width, faceCanvasCtx.canvas.height);
+  t.textureHead.update();
+  */
 
   // draw eye iris
   if (result.meshRaw.length < 478) return;
   if (!meshes.leftEye || !meshes.rightEye) { // create new iris
     meshes.leftEye = BABYLON.MeshBuilder.CreateSphere('leftEye', { diameter: 0.5, updatable: true }, t.scene);
     meshes.rightEye = BABYLON.MeshBuilder.CreateSphere('rightEye', { diameter: 0.5, updatable: true }, t.scene);
+    meshes.leftEye.renderingGroupId = 1;
+    meshes.rightEye.renderingGroupId = 1;
     meshes.leftEye.material = t.materialJoint;
     meshes.rightEye.material = t.materialJoint;
   }

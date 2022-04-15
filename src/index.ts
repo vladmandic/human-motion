@@ -39,6 +39,7 @@ const dom = { // pointers to dom objects
   hand: document.getElementById('hand') as HTMLInputElement,
   selectInput: document.getElementById('select-input') as HTMLSelectElement,
   webcam: document.getElementById('webcam') as HTMLButtonElement,
+  faceCanvas: document.createElement('canvas'),
 };
 
 const log = (...msg: unknown[]) => {
@@ -59,8 +60,8 @@ async function drawResults() {
       dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)} | avg${(1000 * totalCount / totalTime).toFixed(1).padStart(5)}`;
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
-      overlay.draw(width, height, interpolated, dom.input);
-      mesh.draw(width, height, interpolated);
+      await overlay.draw(width, height, interpolated, dom.input);
+      await mesh.draw(width, height, interpolated);
     }
   }
   requestAnimationFrame(() => drawResults());
@@ -148,7 +149,7 @@ async function startWebCam() {
 
 // enable or disable a human model
 const enableModels = (face: boolean, body: boolean, hand: boolean) => { // event that selects active model
-  mesh.init(dom.outputMesh, human.faceTriangulation);
+  mesh.init(dom.outputMesh, human.faceTriangulation, human.faceUVMap);
   if (config.face) config.face.enabled = face;
   if (config.body) config.body.enabled = body;
   if (config.hand) config.hand.enabled = hand;
@@ -195,7 +196,7 @@ async function main() {
   await init();
   // init modules each in its own canvas
   await overlay.init(dom.outputOverlay, human.faceTriangulation);
-  await mesh.init(dom.outputMesh, human.faceTriangulation);
+  await mesh.init(dom.outputMesh, human.faceTriangulation, human.faceUVMap);
   dom.status.innerText = 'ready...';
   worker.onmessage = receiveMessage; // listen to messages from worker thread
   worker.postMessage({ config }); // send initial message to worker thread so it can initialize

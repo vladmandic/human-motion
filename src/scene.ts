@@ -1,4 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
+// import '@babylonjs/inspector';
 
 export class Scene {
   engine!: BABYLON.Engine;
@@ -7,6 +8,7 @@ export class Scene {
   materialBone!: BABYLON.StandardMaterial;
   materialJoint!: BABYLON.StandardMaterial;
   materialHead!: BABYLON.StandardMaterial;
+  textureHead: BABYLON.DynamicTexture;
   camera!: BABYLON.ArcRotateCamera;
   light!: BABYLON.DirectionalLight;
   spotlight!: BABYLON.SpotLight;
@@ -30,26 +32,27 @@ export class Scene {
     BABYLON.Animation.AllowMatricesInterpolation = true;
     this.scene = new BABYLON.Scene(this.engine);
     this.scene.clearCachedVertexData();
-    this.materialBone = new BABYLON.StandardMaterial('materialTube', this.scene);
+    this.materialBone = new BABYLON.StandardMaterial('materialBone', this.scene);
     this.materialBone.diffuseColor = new BABYLON.Color3(0.0, 0.6, 0.6);
     this.materialBone.alpha = 1.0;
     this.materialBone.useSpecularOverAlpha = true;
-    this.materialJoint = new BABYLON.StandardMaterial('materialTube', this.scene);
+    this.materialJoint = new BABYLON.StandardMaterial('materialJoint', this.scene);
     this.materialJoint.diffuseColor = new BABYLON.Color3(0.2, 0.5, 0.5);
     this.materialJoint.alpha = 0.6;
     this.materialJoint.useSpecularOverAlpha = true;
     this.materialHead = new BABYLON.StandardMaterial('materialHead', this.scene);
+    this.textureHead = new BABYLON.DynamicTexture('textureHead', { width: 256, height: 256 }, this.scene);
+    // this.materialHead.diffuseTexture = this.textureHead;
+    // this.materialHead.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0);
+    // this.materialHead.specularColor = new BABYLON.Color3(0.0, 0.0, 0.0);
     this.materialHead.diffuseColor = new BABYLON.Color3(0.6, 1.0, 1.0);
-    this.materialHead.specularColor = new BABYLON.Color3(0.6, 1.0, 1.0);
-    this.materialHead.alpha = 0.7;
-    this.materialHead.specularPower = 0;
 
     this.highlight = new BABYLON.HighlightLayer('highlight', this.scene);
     // start scene
     this.engine.runRenderLoop(() => this.scene.render());
     // camera
     if (this.camera) this.camera.dispose();
-    this.camera = new BABYLON.ArcRotateCamera('camera1', 0, 0, cameraRadius, new BABYLON.Vector3(0.5, 0.5, 0.5), this.scene);
+    this.camera = new BABYLON.ArcRotateCamera('camera', 0, 0, cameraRadius, new BABYLON.Vector3(0.5, 0.5, 0.5), this.scene);
     this.camera.attachControl(this.canvas, false);
     this.camera.lowerRadiusLimit = 0.001;
     this.camera.upperRadiusLimit = 200;
@@ -89,6 +92,7 @@ export class Scene {
     if (introDurationMs > 0) this.intro(introDurationMs);
     // @ts-ignore
     window.t = this;
+    // this.scene.debugLayer.show();
   }
 
   intro(ms: number) {
