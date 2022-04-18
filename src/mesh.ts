@@ -151,16 +151,6 @@ export async function drawFace(result: H.FaceResult) {
   }
   meshes.face.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, true); // update uvmap positions
 
-  // draw original image as texture
-  /*
-  const faceCanvasCtx = t.textureHead.getContext();
-  const input = document.getElementById('input') as HTMLVideoElement;
-  const box = [Math.trunc(input.videoWidth * result.boxRaw[0]), Math.trunc(input.videoHeight * result.boxRaw[1]), Math.trunc(input.videoWidth * result.boxRaw[2]), Math.trunc(input.videoHeight * result.boxRaw[3])];
-  faceCanvasCtx.setTransform(1, 0, 0, -1, 0, faceCanvasCtx.canvas.height);
-  faceCanvasCtx.drawImage(input, box[0], box[1], box[2], box[3], 0, 0, faceCanvasCtx.canvas.width, faceCanvasCtx.canvas.height);
-  t.textureHead.update();
-  */
-
   // draw eye iris
   if (result.meshRaw.length < 478) return;
   if (!meshes.leftEye || !meshes.rightEye) { // create new iris

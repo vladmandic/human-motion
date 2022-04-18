@@ -8,7 +8,6 @@ export class Scene {
   materialBone!: BABYLON.StandardMaterial;
   materialJoint!: BABYLON.StandardMaterial;
   materialHead!: BABYLON.StandardMaterial;
-  textureHead: BABYLON.DynamicTexture;
   camera!: BABYLON.ArcRotateCamera;
   light!: BABYLON.DirectionalLight;
   spotlight!: BABYLON.SpotLight;
@@ -41,10 +40,6 @@ export class Scene {
     this.materialJoint.alpha = 0.6;
     this.materialJoint.useSpecularOverAlpha = true;
     this.materialHead = new BABYLON.StandardMaterial('materialHead', this.scene);
-    this.textureHead = new BABYLON.DynamicTexture('textureHead', { width: 256, height: 256 }, this.scene);
-    // this.materialHead.diffuseTexture = this.textureHead;
-    // this.materialHead.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0);
-    // this.materialHead.specularColor = new BABYLON.Color3(0.0, 0.0, 0.0);
     this.materialHead.diffuseColor = new BABYLON.Color3(0.6, 1.0, 1.0);
 
     this.highlight = new BABYLON.HighlightLayer('highlight', this.scene);
