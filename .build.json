@@ -22,8 +22,8 @@
   "serve": {
     "sslKey": "node_modules/@vladmandic/build/cert/https.key",
     "sslCrt": "node_modules/@vladmandic/build/cert/https.crt",
-    "httpPort": 8000,
-    "httpsPort": 8001,
+    "httpPort": 9000,
+    "httpsPort": 9001,
     "documentRoot": ".",
     "defaultFolder": "src",
     "defaultFile": "index.html"
