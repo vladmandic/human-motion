@@ -29,13 +29,11 @@
     "tensorflowjs"
   ],
   "dependencies": {
-    "@babylonjs/core": "^5.8.0",
-    "@babylonjs/inspector": "^5.8.0",
-    "@babylonjs/materials": "^5.8.0",
-    "@types/react": "^18.0.9",
-    "@types/react-dom": "^18.0.5",
+    "@babylonjs/core": "5.8.1",
+    "@babylonjs/inspector": "5.8.1",
+    "@babylonjs/materials": "5.8.1",
     "@vladmandic/build": "^0.7.4",
-    "@vladmandic/human": "github:vladmandic/human",
+    "@vladmandic/human": "link:../human",
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",

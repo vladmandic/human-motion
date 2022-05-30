@@ -20,37 +20,25 @@
     </style>
   </head>
   <body>
-    <pre id="status" style="position: absolute; top: 12px; right: 20px; background-color: grey; padding: 8px; box-shadow: 2px 2px black"></pre>
-    <div id="media" style="display: flex">
-      <video id="input" style="width: 33%; height: auto" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
-      <canvas id="output-overlay" style="width: 33%; height: auto"></canvas>
-      <canvas id="output-mesh" style="width: 33%; height: auto"></canvas>
+    <pre id="status" style="position: absolute; top: 12px; right: 20px; background-color: #555555; padding: 8px; box-shadow: 2px 2px black; z-index: 1"></pre>
+    <div id="media">
+      <video id="video" style="width: 25vw; height: fit-content; position: fixed; top: 0; left: 0" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
+      <canvas id="output-overlay" style="width: 25vw; height: fit-content; position: fixed; top: 50vh; left: 0" width=720 height=720></canvas>
+      <canvas id="output-mesh" style="width: 75vw; height: 75vw; position: fixed; top: 0; right: 0" width=1920 height=1024></canvas>
     </div>
-    <div id="selections" style="margin: 8px; line-height: 32px">
-      <span>select model
-        <input type="checkbox" id="face" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models" checked> 
+    <div id="selections" style="line-height: 32px; position: fixed; bottom: 0; left: 0; background: #555555; width: 100vw; padding-left: 20px">
+      <span>input
+        <select id="input" name="select-input" title="select-input" style="margin-left: 20px" class="input"></select>
+        <input type="file" id="file-input" style="display: none">
+      </span>
+      <span style="margin-left: 64px">model
+        <input type="checkbox" id="face" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="models" checked> 
         <label for="face">face</label>
-        <input type="checkbox" id="body" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
+        <input type="checkbox" id="body" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="body">body</label>
-        <input type="checkbox" id="hand" style="margin-left: 24px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
+        <input type="checkbox" id="hand" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="hand">hands</label>
       </span>
-      <br>
-      <span>select input
-        <span>
-          <select id="select-input" name="select-input" title="select-input" style="margin-left: 20px" class="input"></select>
-        </span>
-        <span>
-          <label style="margin-left: 24px; background: white; color: black; padding: 4px 12px 4px 12px" for="file-input">upload video</label>
-          <input type="file" id="file-input" style="display: none">
-        </span>
-        <span>
-          <button id="webcam" class="input" style="width: 120px; margin-left: 24px; background: white; color: black; padding: 2px 12px 2px 12px; border: none">use webcam</button>
-        </span> 
-      </span>
-      <br>
-      </span>
     </div>
-    <pre id="log" style="padding: 8px"></pre>
   </body>
 </html>

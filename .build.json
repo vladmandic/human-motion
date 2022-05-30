@@ -35,19 +35,17 @@
       "treeShaking": true,
       "ignoreAnnotations": false,
       "minify": false,
+      "format": "esm",
+      "platform": "browser",
       "banner": { "js": "/*\n  Human: Motion Analytics Demo\n  author: <https://github.com/vladmandic>'\n*/\n" }
     },
     "targets": [
       {
-        "format": "esm",
-        "platform": "browser",
         "name": "index",
         "input": "src/index.ts",
         "output": "dist/index.js"
       },
       {
-        "format": "esm",
-        "platform": "browser",
         "name": "worker",
         "input": "src/worker.ts",
         "output": "dist/worker.js"
