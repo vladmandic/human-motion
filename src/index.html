@@ -23,7 +23,7 @@
     <pre id="status" style="position: absolute; top: 12px; right: 20px; background-color: #555555; padding: 8px; box-shadow: 2px 2px black; z-index: 1"></pre>
     <div id="media">
       <video id="video" style="width: 25vw; height: fit-content; position: fixed; top: 0; left: 0" autoplay loop muted controlslist="nofullscreen nodownload noremoteplayback" disablepictureinpicture></video>
-      <canvas id="output-overlay" style="width: 25vw; height: fit-content; position: fixed; top: 50vh; left: 0" width=720 height=720></canvas>
+      <canvas id="output-overlay" style="width: 25vw; height: fit-content; position: fixed; top: 25vw; left: 0" width=720 height=720></canvas>
       <canvas id="output-mesh" style="width: 75vw; height: 75vw; position: fixed; top: 0; right: 0" width=1920 height=1024></canvas>
     </div>
     <div id="selections" style="line-height: 32px; position: fixed; bottom: 0; left: 0; background: #555555; width: 100vw; padding-left: 20px">
@@ -38,6 +38,14 @@
         <label for="body">body</label>
         <input type="checkbox" id="hand" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="hand">hands</label>
+      </span>
+      <span style="margin-left: 64px" id="highlight">highlight
+        <input type="checkbox" id="points" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh" checked> 
+        <label for="points">points</label>
+        <input type="checkbox" id="outlines" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
+        <label for="outlines">outlines</label>
+        <input type="checkbox" id="meshes" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
+        <label for="mesh">mesh</label>
       </span>
     </div>
   </body>

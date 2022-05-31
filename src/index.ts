@@ -47,7 +47,11 @@ const dom = { // pointers to dom objects
   face: document.getElementById('face') as HTMLInputElement,
   body: document.getElementById('body') as HTMLInputElement,
   hand: document.getElementById('hand') as HTMLInputElement,
+  points: document.getElementById('points') as HTMLInputElement,
+  outlines: document.getElementById('outlines') as HTMLInputElement,
+  meshes: document.getElementById('meshes') as HTMLInputElement,
   input: document.getElementById('input') as HTMLSelectElement,
+  highlight: document.getElementById('highlight') as HTMLSpanElement,
   // log: document.getElementById('log') as HTMLPreElement,
 };
 
@@ -69,7 +73,7 @@ async function drawResults() {
       dom.status.innerText = `process${(1000 / age).toFixed(1).padStart(5)} | refresh${(1000 / (now - drawTimestamp)).toFixed(1).padStart(5)} | avg${(1000 * totalCount / totalTime).toFixed(1).padStart(5)}`;
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
-      await overlay.draw(width, height, interpolated, dom.video);
+      await overlay.draw(width, height, interpolated, dom.video, dom.points.checked, dom.outlines.checked, dom.meshes.checked);
       await mesh.draw(width, height, interpolated);
     }
   }
@@ -166,6 +170,7 @@ const enableModels = (face: boolean, body: boolean, hand: boolean) => { // event
   if (face) models.push(human.config.face.detector?.modelPath, human.config.face.mesh?.modelPath);
   if (body) models.push(human.config.body.modelPath);
   if (hand) models.push(human.config.hand.detector?.modelPath, human.config.hand.skeleton?.modelPath);
+  dom.highlight.style.visibility = face ? 'visible' : 'hidden';
   log(`enabled models: ${models.join(' | ')}`);
 };
 
