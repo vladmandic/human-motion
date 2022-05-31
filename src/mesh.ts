@@ -149,6 +149,10 @@ export async function drawFace(result: H.FaceResult) {
     faceVertexData.indices = faceTriangulation;
     faceVertexData.uvs = faceUVMap.flat();
     faceVertexData.applyToMesh(meshes.face, true);
+    // meshes.face.convertToUnIndexedMesh();
+    // meshes.face.increaseVertices();
+    // meshes.face.forceSharedVertices();
+    // meshes.face.convertToFlatShadedMesh();
   }
   meshes.face.setVerticesData(VertexBuffer.PositionKind, positions, true); // update uvmap positions
 
