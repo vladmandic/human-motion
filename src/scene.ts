@@ -38,6 +38,7 @@ export class MyScene {
     this.materialHead.alpha = 1.0;
     this.materialHead.albedoColor = Color3.FromHexString('#91ECFF');
     this.materialHead.iridescence.isEnabled = true;
+    this.materialHead.backFaceCulling = false;
 
     this.materialBone = new PBRCustomMaterial('bone', this.scene);
     this.materialBone.metallic = 1.0;

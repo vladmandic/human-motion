@@ -1,6 +1,6 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
 
-import { Mesh, VertexData, SineEase, Vector3, Animation, MeshBuilder, VertexBuffer } from '@babylonjs/core';
+import { Mesh, VertexData, SineEase, Vector3, Animation, MeshBuilder, VertexBuffer, PBRMaterial } from '@babylonjs/core';
 import '@babylonjs/inspector';
 import { MyScene } from './scene';
 
@@ -8,7 +8,8 @@ let t: MyScene;
 let faceTriangulation: number[];
 let faceUVMap: [number, number][];
 let meshes: Record<string, Mesh> = {};
-let faceVertexData: VertexData;
+let faceVertexData: VertexData | undefined;
+let previousSmooth = false;
 
 export function init(canvasOutput: HTMLCanvasElement, triangulation: number[], uvmap: [number, number][]) {
   if (!t) t = new MyScene(canvasOutput, 2, 1000);
@@ -126,17 +127,27 @@ async function drawHand(result: H.HandResult, scale: [number, number]) {
   }
 }
 
-export async function drawFace(result: H.FaceResult) {
+export async function drawFace(result: H.FaceResult, useWireframe: boolean, smooth: boolean) {
   if (!t.initialized) centerCamera(1000, result.meshRaw); // first draw
+
+  if (previousSmooth !== smooth) {
+    meshes.face.dispose();
+    previousSmooth = smooth;
+  }
 
   // draw face
   if (result.meshRaw.length < 468) return;
-  if (!meshes.face) { // create new face
+  if (!meshes.face || meshes.face.isDisposed()) { // create new face
     meshes.face = new Mesh('face', t.scene);
     meshes.face.material = t.materialHead;
+    faceVertexData = undefined;
   }
-  const positions = new Float32Array(3 * result.meshRaw.length);
-  for (let i = 0; i < result.meshRaw.length; i++) { // flatten and invert-y
+  if (meshes.face && meshes.face.material) meshes.face.material.wireframe = useWireframe;
+  (meshes.face.material as PBRMaterial).roughness = smooth ? 0.3 : 0.65;
+
+  // use fixed size since iris does not have defined uvmap
+  let positions = new Float32Array(3 * 468);
+  for (let i = 0; i < 468; i++) { // flatten and invert-y
     positions[3 * i + 0] = result.meshRaw[i][0]; // x
     positions[3 * i + 1] = 1 - 1.25 * result.meshRaw[i][1]; // y
     positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 2; // z
@@ -148,13 +159,16 @@ export async function drawFace(result: H.FaceResult) {
     faceVertexData.positions = positions;
     faceVertexData.indices = faceTriangulation;
     faceVertexData.uvs = faceUVMap.flat();
+    if (smooth) {
+      const normals: number[] = [];
+      VertexData.ComputeNormals(positions, faceTriangulation, normals);
+      faceVertexData.normals = normals;
+    } else {
+      faceVertexData.normals = null;
+    }
     faceVertexData.applyToMesh(meshes.face, true);
-    // meshes.face.convertToUnIndexedMesh();
-    // meshes.face.increaseVertices();
-    // meshes.face.forceSharedVertices();
-    // meshes.face.convertToFlatShadedMesh();
   }
-  meshes.face.setVerticesData(VertexBuffer.PositionKind, positions, true); // update uvmap positions
+  meshes.face.updateVerticesData(VertexBuffer.PositionKind, positions, true);
 
   // draw eye iris
   if (result.meshRaw.length < 478) return;
@@ -165,6 +179,14 @@ export async function drawFace(result: H.FaceResult) {
     meshes.rightEye.renderingGroupId = 1;
     meshes.leftEye.material = t.materialJoint;
     meshes.rightEye.material = t.materialJoint;
+  }
+
+  // now add iris positions
+  positions = new Float32Array(3 * 478);
+  for (let i = 468; i < 478; i++) { // flatten and invert-y
+    positions[3 * i + 0] = result.meshRaw[i][0]; // x
+    positions[3 * i + 1] = 1 - 1.25 * result.meshRaw[i][1]; // y
+    positions[3 * i + 2] = (result.meshRaw[i][2] || 0) / 2; // z
   }
   const eyeSize = Math.abs(positions[3 * 469 + 0] - positions[3 * 471 + 0]) + Math.abs(positions[3 * 474 + 0] - positions[3 * 476 + 0]);
   meshes.leftEye.position = new Vector3(positions[3 * 468 + 0], positions[3 * 468 + 1], positions[3 * 468 + 2] / 10);
@@ -181,9 +203,9 @@ export async function drawFace(result: H.FaceResult) {
   */
 }
 
-export async function draw(width: number, height: number, result: H.Result) {
+export async function draw(width: number, height: number, result: H.Result, useWireframe: boolean, smooth: boolean) {
   if (!t) return;
   if (result && result.body && result.body.length > 0) await drawBody(result.body[0], [width, height]);
   if (result && result.hand && result.hand.length > 0) await drawHand(result.hand[0], [width, height]);
-  if (result && result.face && result.face.length > 0) await drawFace(result.face[0]);
+  if (result && result.face && result.face.length > 0) await drawFace(result.face[0], useWireframe, smooth);
 }

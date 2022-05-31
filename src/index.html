@@ -27,7 +27,7 @@
       <canvas id="output-mesh" style="width: 75vw; height: 75vw; position: fixed; top: 0; right: 0" width=1920 height=1024></canvas>
     </div>
     <div id="selections" style="line-height: 32px; position: fixed; bottom: 0; left: 0; background: #555555; width: 100vw; padding-left: 20px">
-      <span>input
+      <span>input:
         <select id="input" name="select-input" title="select-input" style="margin-left: 20px" class="input"></select>
         <input type="file" id="file-input" style="display: none">
       </span>
@@ -39,13 +39,19 @@
         <input type="checkbox" id="hand" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="models"> 
         <label for="hand">hands</label>
       </span>
-      <span style="margin-left: 64px" id="highlight">highlight
+      <span style="margin-left: 64px" id="highlight">display:
         <input type="checkbox" id="points" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh" checked> 
         <label for="points">points</label>
         <input type="checkbox" id="outlines" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
         <label for="outlines">outlines</label>
         <input type="checkbox" id="meshes" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
         <label for="mesh">mesh</label>
+      </span>
+      <span style="margin-left: 64px" id="highlight">mesh:
+        <input type="checkbox" id="wireframe" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
+        <label for="wireframe">wireframe</label>
+        <input type="checkbox" id="smooth" style="margin-left: 16px; vertical-align: middle; width: 18px; height: 18px" name="highligh"> 
+        <label for="smooth">smooth</label>
       </span>
     </div>
   </body>

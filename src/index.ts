@@ -50,6 +50,8 @@ const dom = { // pointers to dom objects
   points: document.getElementById('points') as HTMLInputElement,
   outlines: document.getElementById('outlines') as HTMLInputElement,
   meshes: document.getElementById('meshes') as HTMLInputElement,
+  wireframe: document.getElementById('wireframe') as HTMLInputElement,
+  smooth: document.getElementById('smooth') as HTMLInputElement,
   input: document.getElementById('input') as HTMLSelectElement,
   highlight: document.getElementById('highlight') as HTMLSpanElement,
   // log: document.getElementById('log') as HTMLPreElement,
@@ -74,7 +76,7 @@ async function drawResults() {
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
       await overlay.draw(width, height, interpolated, dom.video, dom.points.checked, dom.outlines.checked, dom.meshes.checked);
-      await mesh.draw(width, height, interpolated);
+      await mesh.draw(width, height, interpolated, dom.wireframe.checked, dom.smooth.checked);
     }
   }
   requestAnimationFrame(() => drawResults());
