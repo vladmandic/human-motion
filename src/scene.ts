@@ -1,5 +1,16 @@
-import { Engine, Scene, ArcRotateCamera, Mesh, Skeleton, ShadowGenerator, SpotLight, DirectionalLight, HighlightLayer, Nullable, HemisphericLight, EnvironmentHelper, Vector3, Animation, Color3, BackEase, CircleEase } from '@babylonjs/core';
+// import { Engine, Scene, ArcRotateCamera, Skeleton, ShadowGenerator, SpotLight, DirectionalLight, HighlightLayer, Nullable, HemisphericLight, EnvironmentHelper, Color3, BackEase, CircleEase } from '@babylonjs/core';
+import { Engine } from '@babylonjs/core/Engines';
+import { Scene } from '@babylonjs/core/scene';
+import { ArcRotateCamera } from '@babylonjs/core/Cameras';
+import { ShadowGenerator, SpotLight, DirectionalLight, HemisphericLight } from '@babylonjs/core/Lights';
+import { HighlightLayer } from '@babylonjs/core/Layers';
+import { Animation, CircleEase, BackEase } from '@babylonjs/core/Animations';
+import { Vector3, Color3 } from '@babylonjs/core/Maths';
 import { PBRCustomMaterial } from '@babylonjs/materials';
+import type { Skeleton } from '@babylonjs/core/Bones';
+import type { Mesh } from '@babylonjs/core/Meshes';
+import type { EnvironmentHelper } from '@babylonjs/core/Helpers';
+import type { Nullable } from '@babylonjs/core';
 
 export class MyScene {
   engine!: Engine;

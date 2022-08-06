@@ -1,6 +1,9 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
-
-import { Mesh, VertexData, SineEase, Vector3, Animation, MeshBuilder, VertexBuffer, PBRMaterial } from '@babylonjs/core';
+import { Mesh, VertexData, MeshBuilder } from '@babylonjs/core/Meshes';
+import { SineEase, Animation } from '@babylonjs/core/Animations';
+import { Vector3 } from '@babylonjs/core/Maths';
+import { VertexBuffer } from '@babylonjs/core/Buffers';
+import type { PBRMaterial } from '@babylonjs/core';
 import '@babylonjs/inspector';
 import { MyScene } from './scene';
 

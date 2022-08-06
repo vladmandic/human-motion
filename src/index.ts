@@ -1,5 +1,5 @@
 import * as H from '@vladmandic/human';
-import { Engine } from '@babylonjs/core';
+import { Engine } from '@babylonjs/core/Engines';
 import * as overlay from './overlay';
 import * as mesh from './mesh';
 
