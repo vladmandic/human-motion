@@ -34,7 +34,7 @@
       "sourcemap": true,
       "treeShaking": true,
       "ignoreAnnotations": false,
-      "minify": false,
+      "minify": true,
       "format": "esm",
       "platform": "browser",
       "banner": { "js": "/*\n  Human: Motion Analytics Demo\n  author: <https://github.com/vladmandic>'\n*/\n" }
