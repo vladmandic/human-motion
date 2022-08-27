@@ -3,7 +3,7 @@
   "description": "Realtime Face/Pose/Hand Motion 3D Model Visualization and 2D Overlay for using Human Library and BabylonJS",
   "license": "MIT",
   "author": "Vladimir Mandic <mandic00@live.com>",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vladmandic/human-motion.git"
@@ -29,19 +29,19 @@
     "tensorflowjs"
   ],
   "dependencies": {
-    "@babylonjs/core": "5.18.0",
-    "@babylonjs/gui": "^5.18.0",
-    "@babylonjs/gui-editor": "^5.18.0",
-    "@babylonjs/inspector": "5.18.0",
-    "@babylonjs/loaders": "^5.18.0",
-    "@babylonjs/materials": "5.18.0",
-    "@babylonjs/serializers": "^5.18.0",
-    "@vladmandic/build": "^0.7.8",
-    "@vladmandic/human": "link:../human",
-    "eslint": "^8.21.0",
+    "@babylonjs/core": "5.21.0",
+    "@babylonjs/gui": "^5.21.0",
+    "@babylonjs/gui-editor": "^5.21.0",
+    "@babylonjs/inspector": "5.21.0",
+    "@babylonjs/loaders": "^5.21.0",
+    "@babylonjs/materials": "5.21.0",
+    "@babylonjs/serializers": "^5.21.0",
+    "@vladmandic/build": "^0.7.10",
+    "@vladmandic/human": "^2.9.3",
+    "eslint": "^8.23.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.2"
   }
 }
