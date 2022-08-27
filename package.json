@@ -36,7 +36,7 @@
     "@babylonjs/loaders": "^5.21.0",
     "@babylonjs/materials": "5.21.0",
     "@babylonjs/serializers": "^5.21.0",
-    "@vladmandic/build": "^0.7.10",
+    "@vladmandic/build": "^0.7.11",
     "@vladmandic/human": "^2.9.3",
     "eslint": "^8.23.0",
     "eslint-config-airbnb-base": "^15.0.0",
