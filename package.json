@@ -29,7 +29,7 @@
     "tensorflowjs"
   ],
   "dependencies": {
-    "@babylonjs/core": "5.24.0",
+    "@babylonjs/core": "5.25.0",
     "@babylonjs/gui": "^5.23.0",
     "@babylonjs/gui-editor": "^5.23.0",
     "@babylonjs/inspector": "5.25.0",
