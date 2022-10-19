@@ -1,7 +1,7 @@
 import type * as H from '@vladmandic/human'; // just import typedefs as we dont need human here
-import { Mesh, VertexData, MeshBuilder } from '@babylonjs/core/Meshes';
+import { Mesh, VertexData, MeshBuilder, LinesMesh } from '@babylonjs/core/Meshes';
 import { SineEase, Animation } from '@babylonjs/core/Animations';
-import { Vector3 } from '@babylonjs/core/Maths';
+import { Vector3, Color3, Path3D } from '@babylonjs/core/Maths';
 import { VertexBuffer } from '@babylonjs/core/Buffers';
 import type { PBRMaterial } from '@babylonjs/core';
 import '@babylonjs/inspector';
@@ -13,16 +13,20 @@ let faceUVMap: [number, number][];
 let meshes: Record<string, Mesh> = {};
 let faceVertexData: VertexData | undefined;
 let previousSmooth = false;
+let paths: Record<string, Path3D> = {};
+let outlines: Record<string, LinesMesh> = {};
 
 export function init(canvasOutput: HTMLCanvasElement, triangulation: number[], uvmap: [number, number][]) {
   if (!t) t = new MyScene(canvasOutput, 2, 1000);
-  t.scene.debugLayer.show({ embedMode: true, overlay: true, showExplorer: true, showInspector: true });
+  // t.scene.debugLayer.show({ embedMode: true, overlay: true, showExplorer: true, showInspector: true });
 
   t.initialized = false;
   faceTriangulation = triangulation;
   faceUVMap = uvmap;
   for (const mesh of Object.values(meshes)) mesh.dispose();
   meshes = {};
+  paths = {};
+  outlines = {};
 }
 
 export function centerCamera(ms: number, points: H.Point[]) {
@@ -130,7 +134,7 @@ async function drawHand(result: H.HandResult, scale: [number, number]) {
   }
 }
 
-export async function drawFace(result: H.FaceResult, useWireframe: boolean, smooth: boolean) {
+export async function drawFace(result: H.FaceResult, scale: [number, number], useWireframe: boolean, smooth: boolean, drawOutlines: boolean) {
   if (!t.initialized) centerCamera(1000, result.meshRaw); // first draw
 
   if (previousSmooth !== smooth) {
@@ -146,7 +150,8 @@ export async function drawFace(result: H.FaceResult, useWireframe: boolean, smoo
     faceVertexData = undefined;
   }
   if (meshes.face && meshes.face.material) meshes.face.material.wireframe = useWireframe;
-  (meshes.face.material as PBRMaterial).roughness = smooth ? 0.3 : 0.65;
+  (meshes.face.material as PBRMaterial).roughness = smooth ? 0.25 : 0.65;
+  (meshes.face.material as PBRMaterial).metallic = smooth ? 1.0 : 0.65;
 
   // use fixed size since iris does not have defined uvmap
   let positions = new Float32Array(3 * 468);
@@ -197,18 +202,34 @@ export async function drawFace(result: H.FaceResult, useWireframe: boolean, smoo
   meshes.rightEye.position = new Vector3(positions[3 * 473 + 0], positions[3 * 473 + 1], positions[3 * 473 + 2] / 10);
   meshes.rightEye.scaling = new Vector3(eyeSize, eyeSize, eyeSize);
 
-  /*
-  for (let i = 478; i < result.meshRaw.length; i++) {
-    const obj = `augment${i}`;
-    if (!meshes[obj]) meshes[obj] = MeshBuilder.CreateSphere(obj, { diameter: 0.005, updatable: true }, t.scene);
-    meshes[obj].position = new Vector3(positions[3 * i + 0], positions[3 * i + 1], positions[3 * i + 2] / 20);
+  // draw outlines
+  for (const part of Object.keys(result.annotations)) {
+    if (!part.startsWith('lips')) continue; // draw just lips although all work
+    if (drawOutlines) {
+      const points = result.annotations[part as H.FaceLandmark].map((pt) => new Vector3(pt[0] / scale[0], 1 - 1.25 * (pt[1] / scale[1]), (pt[2] || 0) / ((scale[0] + scale[1] / 2)) - 0.04));
+      if (!paths[part]) paths[part] = new Path3D(points);
+      else paths[part].update(points);
+      const curve = paths[part].getCurve();
+      if (!outlines[part] || outlines[part].isDisposed()) {
+        outlines[part] = MeshBuilder.CreateLines(part, { points: curve, updatable: true }, t.scene);
+        let color: Color3;
+        if (part.startsWith('lips')) color = Color3.FromHexString('#FF9090');
+        else if (part.startsWith('left')) color = Color3.FromHexString('#868686');
+        else if (part.startsWith('right')) color = Color3.FromHexString('#868686');
+        else color = Color3.FromHexString('#1FC4FF');
+        outlines[part].color = color;
+      } else {
+        outlines[part] = MeshBuilder.CreateLines(part, { points: curve, instance: outlines[part], updatable: true }, t.scene);
+      }
+    } else if (outlines[part] && !outlines[part].isDisposed()) {
+      outlines[part].dispose();
+    }
   }
-  */
 }
 
-export async function draw(width: number, height: number, result: H.Result, useWireframe: boolean, smooth: boolean) {
+export async function draw(width: number, height: number, result: H.Result, useWireframe: boolean, smooth: boolean, drawOutlines: boolean) {
   if (!t) return;
   if (result && result.body && result.body.length > 0) await drawBody(result.body[0], [width, height]);
   if (result && result.hand && result.hand.length > 0) await drawHand(result.hand[0], [width, height]);
-  if (result && result.face && result.face.length > 0) await drawFace(result.face[0], useWireframe, smooth);
+  if (result && result.face && result.face.length > 0) await drawFace(result.face[0], [width, height], useWireframe, smooth, drawOutlines);
 }

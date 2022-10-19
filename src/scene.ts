@@ -65,20 +65,6 @@ export class MyScene {
     this.materialJoint.albedoColor = Color3.FromHexString('#FFFFFF');
     this.materialJoint.iridescence.isEnabled = true;
 
-    // this.materialHead.subSurface.isRefractionEnabled = true;
-    /*
-    this.materialBone = new StandardMaterial('materialBone', this.scene);
-    this.materialBone.diffuseColor = new Color3(0.0, 0.6, 0.6);
-    this.materialBone.alpha = 1.0;
-    this.materialBone.useSpecularOverAlpha = true;
-    this.materialJoint = new StandardMaterial('materialJoint', this.scene);
-    this.materialJoint.diffuseColor = new Color3(0.2, 0.5, 0.5);
-    this.materialJoint.alpha = 0.6;
-    this.materialJoint.useSpecularOverAlpha = true;
-    this.materialHead = new StandardMaterial('materialHead', this.scene);
-    this.materialHead.diffuseColor = new Color3(0.6, 1.0, 1.0);
-    */
-
     this.highlight = new HighlightLayer('highlight', this.scene);
     // start scene
     this.engine.runRenderLoop(() => this.scene.render());

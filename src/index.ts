@@ -3,8 +3,11 @@ import { Engine } from '@babylonjs/core/Engines';
 import * as overlay from './overlay';
 import * as mesh from './mesh';
 
+// downscale or upscale to this ideal resolution
 const width = 720;
 const height = 720;
+// use webworker for processing or run in the main thread
+const useWebWorker = true;
 
 const samples = [
   { label: '[select input]', type: 'none' },
@@ -15,10 +18,9 @@ const samples = [
   { label: 'Sample: Hand', url: '../assets/ASLSignAlphabet.webm', type: 'video' },
 ];
 
+// basic human configuration // all models are initially disabled as enabling is via ui
 const config: Partial<H.Config> = {
-  backend: 'humangl' as const,
-  // modelBasePath: '../assets',
-  // modelBasePath: 'https://storage.googleapis.com/human-models/',
+  // backend: 'webgpu',
   modelBasePath: 'https://vladmandic.github.io/human-models/models/',
   cacheSensitivity: 0,
   filter: { enabled: true, equalization: false, width, height },
@@ -30,7 +32,7 @@ const config: Partial<H.Config> = {
 };
 
 const human = new H.Human(config); // local instance of human used only to prepare input and interpolate results
-const worker = new Worker('../dist/worker.js'); // processing is done inside web worker
+let worker: Worker;
 let result: H.Result; // last known good result from human.detect
 let drawTimestamp = 0; // used to calculate fps
 let tensors = 0; // monitors tensor counts inside web worker
@@ -54,20 +56,17 @@ const dom = { // pointers to dom objects
   smooth: document.getElementById('smooth') as HTMLInputElement,
   input: document.getElementById('input') as HTMLSelectElement,
   highlight: document.getElementById('highlight') as HTMLSpanElement,
-  // log: document.getElementById('log') as HTMLPreElement,
 };
 
-const log = (...msg: unknown[]) => {
-  // dom.log.innerText += msg.join(' ') + '\n';
-  console.log(...msg);
-};
+const log = (...msg: unknown[]) => console.log(...msg); // just a wrapper function
 
-// draw loop runs at fixed 60 fps
+// draw loop runs at fixed 30 fps
 async function drawResults() {
+  if (!useWebWorker) result = human.result; // use local result
   if (result) {
     const now = Date.now();
     const age = now - result.timestamp;
-    if (age > 500) { // let it run for just a bit longer so interpolation caches up
+    if (age > 750) { // let it run for just a bit longer so interpolation caches up
       dom.status.innerText = 'paused';
     } else {
       totalTime += age;
@@ -76,21 +75,26 @@ async function drawResults() {
       drawTimestamp = now;
       const interpolated = await human.next(result); // interpolate results
       await overlay.draw(width, height, interpolated, dom.video, dom.points.checked, dom.outlines.checked, dom.meshes.checked);
-      await mesh.draw(width, height, interpolated, dom.wireframe.checked, dom.smooth.checked);
+      await mesh.draw(width, height, interpolated, dom.wireframe.checked, dom.smooth.checked, dom.outlines.checked);
     }
   }
-  requestAnimationFrame(() => drawResults());
+  setTimeout(() => drawResults(), 30);
+  // requestAnimationFrame(() => drawResults());
 }
 
 // detect loop runs as fast as results are received
 async function requestDetect() {
   if (busy || dom.video.readyState < 2) return; // already processing or video not ready
-  const processed = await human.image(dom.video); // process input in main thread
-  const image = await processed.tensor?.data() as Float32Array; // download data to use as transferrable object
-  human.tf.dispose(processed.tensor);
-  if (image) {
-    busy = true;
-    worker.postMessage({ image, width, height, config }, [image.buffer]); // immediately request next frame
+  if (useWebWorker) {
+    const processed = await human.image(dom.video); // process input in main thread
+    const image = await processed.tensor?.data() as Float32Array; // download data to use as transferrable object
+    human.tf.dispose(processed.tensor);
+    if (image) {
+      busy = true;
+      worker.postMessage({ image, width, height, config }, [image.buffer]); // immediately request next frame
+    }
+  } else {
+    human.video(dom.video);
   }
 }
 
@@ -106,6 +110,7 @@ async function receiveMessage(msg: MessageEvent) {
   if (!dom.video.paused) await requestDetect(); // if not paused request next frame
 }
 
+// resize outputs based on input video
 const resize = () => {
   dom.video.width = dom.video.videoWidth;
   dom.video.height = dom.video.videoHeight;
@@ -141,7 +146,7 @@ async function loadVideo(url: string, title?: string) {
 
 // initialize webcam and set video to use webcam as source
 async function startWebCam() {
-  const constraints = { audio: false, video: { facingMode: 'user', resizeMode: 'crop-and-scale', width: { ideal: 1280 }, height: { ideal: 1280 } } };
+  const constraints = { audio: false, video: { facingMode: 'user', resizeMode: 'crop-and-scale', width: { ideal: width }, height: { ideal: height } } };
   const stream: MediaStream = await navigator.mediaDevices.getUserMedia(constraints);
   const ready = new Promise((resolve) => { dom.video.onloadeddata = () => resolve(true); });
   if (dom.video.src) dom.video.src = '';
@@ -168,6 +173,7 @@ const enableModels = (face: boolean, body: boolean, hand: boolean) => { // event
   if (config.face) config.face.enabled = face;
   if (config.body) config.body.enabled = body;
   if (config.hand) config.hand.enabled = hand;
+  human.validate(config);
   const models = [];
   if (face) models.push(human.config.face.detector?.modelPath, human.config.face.mesh?.modelPath);
   if (body) models.push(human.config.body.modelPath);
@@ -210,14 +216,19 @@ async function main() {
   dom.status.innerText = 'loading...';
   await human.validate(config); // check for possible configuration errors
   await human.init(); // requires explicit init since were not using any of the auto functions
-  log('human', human.version, '| tfjs', human.tf.version.tfjs, '| babylon', Engine.Version, '|', human.env.webgl.version?.toLowerCase());
+  log('versions', { human: human.version, tfjs: human.tf.version.tfjs, babylon: Engine.Version });
   await init();
   // init modules each in its own canvas
   await overlay.init(dom.outputOverlay, human.faceTriangulation);
   await mesh.init(dom.outputMesh, human.faceTriangulation, human.faceUVMap);
   dom.status.innerText = 'ready...';
-  worker.onmessage = receiveMessage; // listen to messages from worker thread
-  worker.postMessage({ config }); // send initial message to worker thread so it can initialize
+  if (useWebWorker) {
+    worker = new Worker('../dist/worker.js'); // processing is done inside web worker
+    worker.onmessage = receiveMessage; // listen to messages from worker thread
+    worker.postMessage({ config }); // send initial message to worker thread so it can initialize
+  } else {
+    console.log('human', { worker: false, backend: human.tf.getBackend(), env: human.env });
+  }
   drawResults();
   enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);
 }
