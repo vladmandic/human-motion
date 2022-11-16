@@ -7,7 +7,9 @@ import * as mesh from './mesh';
 const width = 720;
 const height = 720;
 // use webworker for processing or run in the main thread
-const useWebWorker = true;
+let useWebWorker = true;
+
+if (typeof OffscreenCanvas === 'undefined') useWebWorker = false; // firefox and safari still do not support offscreencanvas so webworkers are not usable
 
 const samples = [
   { label: '[select input]', type: 'none' },
@@ -58,7 +60,7 @@ const dom = { // pointers to dom objects
   highlight: document.getElementById('highlight') as HTMLSpanElement,
 };
 
-const log = (...msg: unknown[]) => console.log(...msg); // just a wrapper function
+const log = (...msg: unknown[]) => console.log(...msg); // eslint-disable-line no-console
 
 // draw loop runs at fixed 30 fps
 async function drawResults() {
@@ -84,9 +86,9 @@ async function drawResults() {
 
 // detect loop runs as fast as results are received
 async function requestDetect() {
-  if (busy || dom.video.readyState < 2) return; // already processing or video not ready
+  if (busy || (dom.video.readyState < 2)) return; // already processing or video not ready
   if (useWebWorker) {
-    const processed = await human.image(dom.video); // process input in main thread
+    const processed = await human.image(dom.video, true); // process input in main thread
     const image = await processed.tensor?.data() as Float32Array; // download data to use as transferrable object
     human.tf.dispose(processed.tensor);
     if (image) {
@@ -227,7 +229,7 @@ async function main() {
     worker.onmessage = receiveMessage; // listen to messages from worker thread
     worker.postMessage({ config }); // send initial message to worker thread so it can initialize
   } else {
-    console.log('human', { worker: false, backend: human.tf.getBackend(), env: human.env });
+    log('human', { worker: false, backend: human.tf.getBackend(), env: human.env });
   }
   drawResults();
   enableModels(dom.face.checked, dom.body.checked, dom.hand.checked);

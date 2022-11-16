@@ -30,7 +30,6 @@
     "lines-between-class-members": "off",
     "no-await-in-loop": "off",
     "no-continue": "off",
-    "no-console": "off",
     "no-mixed-operators": "off",
     "no-plusplus": "off",
     "no-loop-func": "off",
