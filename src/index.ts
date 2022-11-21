@@ -22,11 +22,18 @@ const samples = [
 
 // basic human configuration // all models are initially disabled as enabling is via ui
 const config: Partial<H.Config> = {
-  // backend: 'webgpu',
+  debug: true,
   modelBasePath: 'https://vladmandic.github.io/human-models/models/',
   cacheSensitivity: 0,
   filter: { enabled: true, equalization: false, width, height },
-  face: { enabled: false, detector: { rotation: false, maxDetected: 1 }, mesh: { enabled: true }, attention: { enabled: true }, iris: { enabled: false }, description: { enabled: false }, emotion: { enabled: false } },
+  face: { enabled: false,
+    detector: { rotation: false, maxDetected: 1 },
+    mesh: { enabled: true },
+    attention: { enabled: true },
+    iris: { enabled: false },
+    description: { enabled: false },
+    emotion: { enabled: false },
+  },
   body: { enabled: false, minConfidence: 0.1, maxDetected: 1, modelPath: 'blazepose-heavy.json' },
   hand: { enabled: false, minConfidence: 0.1, maxDetected: 1, landmarks: true, rotation: false },
   object: { enabled: false },
